@@ -2,7 +2,6 @@
 
 An interactive animated clock visualization featuring a 16×8 grid of animated clocks with mesmerizing patterns, themes, and real-time updates.
 
-############################################################
 
 
 **WAYS TO USE :**
@@ -14,7 +13,6 @@ An interactive animated clock visualization featuring a 16×8 grid of animated c
 
 **NOTE** : For "clock_with_wallpaper.html" the wallpaper must be named wallpaper.jpg by default and must be placed in same directory as the html file and for error of no wallpaper showing place both wallpaper and html files close to home directory as sometimes browsers have this problem with long file_paths.
 
-############################################################
 
 **CONTROLS :**
 
@@ -24,7 +22,6 @@ An interactive animated clock visualization featuring a 16×8 grid of animated c
 |          Space(__)       | Display current time in digital format (HH:MM) |
 |            F             |            Toggle fullscreen mode              |
 
-############################################################
 
 ## Credits :
 
