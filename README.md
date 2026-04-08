@@ -12,7 +12,7 @@ An interactive animated clock visualization featuring a 16×8 grid of animated c
  .) Hidamari, Komorebi or Hanabi,etc. For Linux
  .) Lively Wallpaper, Wallpaper Engine or AutoWall,etc For Windows
 
-**NOTE** : For "clock_with_wallpaper.html" the wallpaper must be named wallpaper.jpg by default and must be placed in same directory as the html file
+**NOTE** : For "clock_with_wallpaper.html" the wallpaper must be named wallpaper.jpg by default and must be placed in same directory as the html file and for error of no wallpaper showing place both wallpaper and html files close to home directory as sometimes browsers have this problem with long file_paths.
 
 ############################################################
 
