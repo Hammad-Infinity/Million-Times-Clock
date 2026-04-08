@@ -1,11 +1,11 @@
-A Million Times Clock Art
+**A Million Times Clock Art For Desktop Wallpaer**
 
 An interactive animated clock visualization featuring a 16×8 grid of animated clocks with mesmerizing patterns, themes, and real-time updates.
 
 ############################################################
 
 
-WAYS TO USE :
+**WAYS TO USE :**
 
 1) Simply open the "clock.html" file in any modern browser
 2) Use Webpage Wallpaper apps like :
@@ -15,7 +15,7 @@ WAYS TO USE :
 
 ############################################################
 
-CONTROLS :
+**CONTROLS :**
 
 |          KEY             |                   Action                       |
 -----------------------------------------------------------------------------
