@@ -16,13 +16,13 @@ An interactive animated clock visualization featuring a 16×8 grid of animated c
 
 **CONTROLS :**
 
-|          KEY             |                   Action                       |
+|          KEY             |                   Action                       |                                            
 -----------------------------------------------------------------------------
-|   Settings Button (⚙️)   |          Open/close settings panel             |
-|          Space(__)       | Display current time in digital format (HH:MM) |
-|            F             |            Toggle fullscreen mode              |
+|   Settings Button (⚙️)   |          Open/close settings panel             |                                           
+|          Space(__)       | Display current time in digital format (HH:MM) |                                            
+|            F             |            Toggle fullscreen mode              |                                            
 
 
 ## Credits :
 
-- this projects underlying logic was from "https://www.a-million-times.com/" created by techniccontroller and I changed It       accordingly to be compatible with setting as desktop wallpaper too and changing many of its UI settings.
+- This projects underlying logic was from "https://www.a-million-times.com/" created by techniccontroller and I changed It       accordingly to be compatible with setting as desktop wallpaper too and changing many of its UI settings.
