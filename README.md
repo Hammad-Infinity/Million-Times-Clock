@@ -1,4 +1,4 @@
-**A Million Times Clock Art For Desktop Wallpaer**
+**A Million Times Clock Art For Desktop Wallpaper**
 
 An interactive animated clock visualization featuring a 16×8 grid of animated clocks with mesmerizing patterns, themes, and real-time updates.
 
