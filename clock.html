@@ -61,7 +61,6 @@
       fill: #333;
     }
 
-    /* --- Settings Modal --- */
     #settings-modal {
       display: none;
       position: fixed;
@@ -164,7 +163,6 @@
       flex-grow: 1;
     }
 
-    /* Visually hidden but still readable by screen readers + indexable */
     .visually-hidden {
       position: absolute !important;
       width: 1px !important;
@@ -221,9 +219,7 @@
 
 <script>
 (() => {
-  // --------------------------
-  // Constants / palette
-  // --------------------------
+  
   const Cols = 16;
   const Rows = 8;
 
@@ -238,20 +234,16 @@
   const FRAME_INTERVAL = 1 / MAX_FPS;
   let lastRenderSec = 0;
 
-  // Hand shadow (blurred, offset down-right)
-  // Values are in CSS px; we scale by DPR at draw-time.
+  // Hand shadow
   const HAND_SHADOW_OFFSET = 4;
   const HAND_SHADOW_BLUR   = 8;
   const HAND_SHADOW_ALPHA  = 0.30;
 
-  // Pattern cadence (will be mutated by patterns like your C#)
+  // Pattern cadence
   let PatternPeriodSeconds = TransitionSeconds;
   const totalPattern = 8;
   let patternIndex = 3;
 
-  // --------------------------
-  // Helpers
-  // --------------------------
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp  = (a, b, t) => a + (b - a) * t;
 
@@ -279,9 +271,7 @@
     return t * t * (3 - 2 * t);
   }
 
-  // --------------------------
-  // Clock state patterns (digits)
-  // --------------------------
+  // Clock state patterns
   const clockStates = [
     { a: 0,   b: 0   },
     { a: 0,   b: 90  },
@@ -321,7 +311,6 @@
     const timePosY = 1;
     const pattern = new Array(Cols * Rows);
 
-    // match your C# behavior
     const hours = date.getHours();
     const minutes = date.getMinutes();
 
@@ -364,9 +353,6 @@
     return pattern;
   }
 
-  // --------------------------
-  // Animated Clock (two hands)
-  // --------------------------
   class Clock {
     constructor() {
       this.angleA = 0;
@@ -421,9 +407,6 @@
     for (let i = 0; i < Cols * Rows; i++) clocks.push(new Clock());
   }
 
-  // --------------------------
-  // Pattern functions (ported)
-  // --------------------------
   function getPatternAngles(row, col, rows, cols, quantize = false) {
     const cx = (cols - 1) * 0.5;
     const cy = (rows - 1) * 0.5;
@@ -517,9 +500,6 @@
     return [a, b];
   }
 
-  // --------------------------
-  // Vortex Field (ported)
-  // --------------------------
   class VortexField {
     constructor(cfg) { this.cfg = cfg; }
 
@@ -594,9 +574,6 @@
     }
   }
 
-  // --------------------------
-  // ApplyPattern (ported)
-  // --------------------------
   let currentTimePattern = new Array(Cols * Rows).fill(clockStates[12]);
   let nextPatternSwitchSec = 0;
 
@@ -687,13 +664,9 @@
     }
   }
 
-  // --------------------------
-  // Drawing
-  // --------------------------
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
 
-  // Cached layout + prerendered clock face
   let cellSize = 50;
   let radius, lenA, lenB, thickA, thickB, hubR, pad;
   const clockFaceCanvas = document.createElement('canvas');
@@ -714,16 +687,13 @@
 
     cellSize = Math.floor(Math.min(maxW / Cols, maxH / Rows));
 
-    // CSS size (what the user sees)
     pad = cellSize * 0.03;
     const cssW = Math.floor(cellSize * Cols + pad);
     const cssH = Math.floor(cellSize * Rows + pad);
 
-    // Set displayed size
     canvas.style.width = cssW + "px";
     canvas.style.height = cssH + "px";
 
-    // Set internal buffer size (hi-res)
     const bufW = Math.floor(cssW * dpr);
     const bufH = Math.floor(cssH * dpr);
 
@@ -746,7 +716,6 @@
     thickB = thickA;
     hubR = thickA / 2;
 
-    // Pre-render clock face at DPR resolution (crisp)
     clockFaceCanvas.width = Math.ceil(diameter * dpr);
     clockFaceCanvas.height = Math.ceil(diameter * dpr);
     clockFaceCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -757,7 +726,6 @@
   }
 
   function rerenderClockFace() {
-    // Re-render the pre-rendered clock face with current colors
     clockFaceCtx.clearRect(0, 0, clockFaceCanvas.width, clockFaceCanvas.height);
     drawClockFace(radius, radius, radius, clockFaceCtx);
   }
@@ -789,7 +757,6 @@
     ctx.closePath();
   }
 
-  // UPDATED: blurred shadow via canvas shadow* (fastest per-hand way)
   function drawHand(cx, cy, angleDeg, length, thickness, shadowOffsetPx, shadowBlurPx) {
     ctx.save();
     ctx.translate(cx, cy);
@@ -810,7 +777,6 @@
     roundedRectPath(x, y, w, h, corner);
     ctx.fill();
 
-    // prevent shadow leaking to subsequent drawing ops
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
@@ -830,7 +796,6 @@
     const diameter = radius * 2;
     const offset = (cellSize - diameter) / 2;
 
-    // DPR-correct shadow sizing
     const shadowOffsetPx = HAND_SHADOW_OFFSET;
     const shadowBlurPx   = HAND_SHADOW_BLUR;
 
@@ -844,7 +809,6 @@
 
         const c = clocks[idx];
 
-        // B behind, then A
         drawHand(cx, cy, c.angleB, lenB, thickB, shadowOffsetPx*0.8, shadowBlurPx);
         drawHand(cx, cy, c.angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
 
@@ -860,19 +824,14 @@
     }
   }
 
-  // --------------------------
-  // Main loop (UPDATED: FPS cap)
-  // --------------------------
   function tick(tsMs) {
     requestAnimationFrame(tick);
     const nowSec = tsMs / 1000;
 
-    // FPS cap: if nothing forces a redraw, skip work
     if (nowSec - lastRenderSec < FRAME_INTERVAL && !isAnimating) {
       return;
     }
 
-    // switch patterns on cadence
     if (nowSec >= nextPatternSwitchSec) {
       patternIndex = (patternIndex + 1) % totalPattern;
       applyPattern(patternIndex, nowSec);
@@ -883,8 +842,6 @@
       } while (nowSec >= nextPatternSwitchSec);
     }
 
-    // If we're not animating, still allow occasional redraw
-    // But we keep it capped by FRAME_INTERVAL via lastRenderSec.
     let anyMoving = false;
     if (isAnimating) {
       for (const c of clocks) {
@@ -894,7 +851,6 @@
       isAnimating = anyMoving;
     }
 
-    // Enforce FPS cap for drawing (also caps while animating)
     if (nowSec - lastRenderSec < FRAME_INTERVAL) {
       return;
     }
@@ -903,9 +859,6 @@
     draw(nowSec);
   }
 
-  // --------------------------
-  // Controls (Settings)
-  // --------------------------
   function setupControls() {
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -913,7 +866,6 @@
     const transitionValue = document.getElementById('transition-value');
     const colorSwatchesContainer = document.getElementById('color-swatches');
 
-    // --- Themes ---
     const themes = [
       { name: 'Black on White', hand: { r: 0, g: 0, b: 0, a: 1.0 }, back: { r: 255, g: 255, b: 255, a: 1.0 }, shadow: { r: 200, g: 200, b: 200, a: 0.61 } },
       { name: 'White on Black', hand: { r: 255, g: 255, b: 255, a: 1.0 }, back: { r: 0, g: 0, b: 0, a: 1.0 }, shadow: { r: 50, g: 50, b: 50, a: 0.61 } },
@@ -923,7 +875,6 @@
       { name: 'Gold', hand: { r: 50, g: 40, b: 0, a: 1.0 }, back: { r: 255, g: 215, b: 0, a: 1.0 }, shadow: { r: 200, g: 160, b: 0, a: 0.61 } },
     ];
     
-    // Apply Forest theme as default
    handColor = themes[3].hand;
    backColor = themes[3].back;
    shadowColor = themes[3].shadow;
@@ -933,28 +884,20 @@
    
     let activeThemeIndex = 3;
     
-    //------------------------
-    // Settings menu Theme 
-    //------------------------
     function updateModalTheme() {
       const modal = document.getElementById('settings-modal');
       if (!modal) return;
-
-      // Background: use current backColor
+      
       const bgColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
       modal.style.backgroundColor = bgColor;
 
-      // Text color: black or white based on luminance
       const luminance = (0.299 * backColor.r + 0.587 * backColor.g + 0.114 * backColor.b) / 255;
       const textColor = luminance > 0.5 ? '#333' : '#f0f0f0';
       modal.style.color = textColor;
-      modal.style.borderColor = luminance > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)';
-
-      // Slider track color: dark for light backgrounds, light for dark backgrounds
+      modal.style.borderColor = luminance > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,2
       const trackColor = luminance > 0.5 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
       document.documentElement.style.setProperty('--slider-track', trackColor);
 
-      // Update headings and labels
       const headings = modal.querySelectorAll('h3, label');
       headings.forEach(el => el.style.color = textColor);
     }
@@ -974,7 +917,6 @@
         backColor = themes[index].back;
         shadowColor = themes[index].shadow;
         
-        // Update active swatch
         document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
         swatch.classList.add('active');
 
@@ -983,10 +925,8 @@
         console.log(`Back Color: rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`);
         console.log(`Shadow Color: rgb(${shadowColor.r}, ${shadowColor.g}, ${shadowColor.b})`);
 
-        // Update container background color
         document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
 
-        // Force re-render of clock faces and canvas
         rerenderClockFace();
         isAnimating = true;
         updateModalTheme();
@@ -994,8 +934,6 @@
       colorSwatchesContainer.appendChild(swatch);
     });
 
-
-    // Hide controls in fullscreen mode
     document.addEventListener('fullscreenchange', () => {
       const controls = document.querySelector('.controls');
       if (document.fullscreenElement) {
@@ -1006,16 +944,14 @@
         controls.style.display = 'flex';
       }
     });
-
-    // --- Settings Modal ---
+    
     settingsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
       settingsModal.style.display = isHidden ? 'block' : 'none';
       infoModal.style.display = 'none';
     });
-
-    // --- Transition Slider ---
+    
     transitionSlider.value = TransitionSeconds;
     transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
     transitionSlider.addEventListener('input', () => {
@@ -1043,13 +979,8 @@
 
   window.addEventListener('resize', resize);
 
-  // --------------------------
-  // Init
-  // --------------------------
   createClocks();
   resize();
-  
-  // Set initial container background
   document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
 
   const nowSec = performance.now() / 1000;
