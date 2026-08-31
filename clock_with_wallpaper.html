@@ -14,8 +14,7 @@
       margin: 0;
       height: 100%;
       overflow: hidden;
-      /* 👇 Replace with your wallpaper filename */
-      background-image: url('wallpaper.jpg');
+      background-image: url('wallpaper.jpg');    /* change name to your wallpaper's name in same directory of this file */
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -228,13 +227,9 @@
 
 <script>
 (() => {
-  // --------------------------
-  // Constants
-  // --------------------------
   const Cols = 16;
   const Rows = 8;
 
-  // Only hand colour is configurable now
   let handColor = { r: 230, g: 230, b: 230, a: 1.0 }; // default light grey
 
   let TransitionSeconds = 20.0;
@@ -254,9 +249,6 @@
   const totalPattern = 8;
   let patternIndex = 3;
 
-  // --------------------------
-  // Helpers
-  // --------------------------
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp  = (a, b, t) => a + (b - a) * t;
 
@@ -284,9 +276,6 @@
     return t * t * (3 - 2 * t);
   }
 
-  // --------------------------
-  // Clock state patterns (digits)
-  // --------------------------
   const clockStates = [
     { a: 0,   b: 0   },
     { a: 0,   b: 90  },
@@ -368,9 +357,6 @@
     return pattern;
   }
 
-  // --------------------------
-  // Animated Clock
-  // --------------------------
   class Clock {
     constructor() {
       this.angleA = 0;
@@ -425,9 +411,6 @@
     for (let i = 0; i < Cols * Rows; i++) clocks.push(new Clock());
   }
 
-  // --------------------------
-  // Pattern functions (ported)
-  // --------------------------
   function getPatternVector(row, col, rows, cols, cxRatio = 0.5, cyRatio = 0.5) {
     const cx = (cols - 1) * cxRatio;
     const cy = (rows - 1) * cyRatio;
@@ -470,9 +453,6 @@
     return [a, b];
   }
 
-  // --------------------------
-  // Vortex Field
-  // --------------------------
   class VortexField {
     constructor(cfg) { this.cfg = cfg; }
 
@@ -547,9 +527,6 @@
     }
   }
 
-  // --------------------------
-  // ApplyPattern
-  // --------------------------
   let currentTimePattern = new Array(Cols * Rows).fill(clockStates[12]);
   let nextPatternSwitchSec = 0;
 
@@ -636,10 +613,7 @@
       }
     }
   }
-
-  // --------------------------
-  // Drawing
-  // --------------------------
+  
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
 
@@ -759,10 +733,7 @@
       }
     }
   }
-
-  // --------------------------
-  // Main loop
-  // --------------------------
+  
   function tick(tsMs) {
     requestAnimationFrame(tick);
     const nowSec = tsMs / 1000;
@@ -798,9 +769,7 @@
     draw();
   }
 
-  // --------------------------
-  // Controls (Settings)
-  // --------------------------
+  // Controls
   function setupControls() {
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -808,7 +777,7 @@
     const transitionValue = document.getElementById('transition-value');
     const colorSwatchesContainer = document.getElementById('color-swatches');
 
-    // Hand colour themes only
+    // Themes
     const themes = [
       { name: 'White',     color: { r: 255, g: 255, b: 255, a: 1.0 } },
       { name: 'Black',     color: { r:   0, g:   0, b:   0, a: 1.0 } },
@@ -821,9 +790,8 @@
       { name: 'Purple',    color: { r: 128, g:   0, b: 128, a: 1.0 } },
     ];
 
-    let activeThemeIndex = 0; // default to White
+    let activeThemeIndex = 0;
 
-    // Set default hand colour
     handColor = themes[activeThemeIndex].color;
 
     themes.forEach((theme, index) => {
@@ -846,7 +814,6 @@
       colorSwatchesContainer.appendChild(swatch);
     });
 
-    // Hide controls in fullscreen
     document.addEventListener('fullscreenchange', () => {
       const controls = document.querySelector('.controls');
       if (document.fullscreenElement) {
@@ -857,7 +824,6 @@
       }
     });
 
-    // Settings Modal toggle
     settingsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
@@ -872,7 +838,6 @@
       transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
     });
 
-    // Close modal when clicking outside
     window.addEventListener('click', (e) => {
       if (!settingsModal.contains(e.target) && e.target !== settingsBtn) {
         settingsModal.style.display = 'none';
@@ -880,7 +845,6 @@
     });
   }
 
-  // Keyboard shortcuts
   window.addEventListener('keydown', e => {
     if (e.code === 'Space') {
       const nowSec = performance.now() / 1000;
@@ -900,9 +864,6 @@
 
   window.addEventListener('resize', resize);
 
-  // --------------------------
-  // Init
-  // --------------------------
   createClocks();
   resize();
 
