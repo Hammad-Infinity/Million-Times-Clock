@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>A Million Times Clock Art</title>
   <style>
@@ -18,8 +19,8 @@
    }
     #clock-container {
       position: absolute;
-      top: calc(50% + (var(--top-panel-height) / 2) + 9px);
-      left: calc(50% + (var(--dock-width) / 2));
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
       align-items: center;
@@ -28,6 +29,7 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       padding: 2vmin;
       border-radius: 2vmin;
+      transition: background-color 0.4s ease;
     }
     canvas {
       display: block;
@@ -51,6 +53,7 @@
       justify-content: center;
       width: 40px;
       height: 40px;
+      transition: background 0.2s;
     }
     .controls button:hover {
       background: white;
@@ -66,38 +69,31 @@
       position: fixed;
       top: 60px;
       right: 10px;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(0, 0, 0, 0.1);
       border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
       z-index: 1000;
-      width: 220px;
+      width: 260px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      animation: modalFadeIn 0.2s ease;
     }
-    #info-modal {
-      display: none;
-      position: fixed;
-      top: calc(70px + var(--top-panel-height));
-      right: 20px;
-      background: rgba(255, 255, 255, 0.95);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
-      width: 280px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    #settings-modal h3, #info-modal h3 {
+    #settings-modal h3 {
       margin-top: 0;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       font-size: 16px;
       font-weight: 600;
       color: #333;
     }
     #settings-modal .setting {
-      margin-bottom: 15px;
+      margin-bottom: 8px;
     }
     #settings-modal label {
       font-size: 14px;
@@ -140,8 +136,14 @@
     }
     .color-swatches {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .swatch-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
     }
     .color-swatch {
       width: 100%;
@@ -149,10 +151,21 @@
       border: 2px solid transparent;
       border-radius: 5px;
       cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .color-swatch.active {
       border-color: #007aff;
       box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+    }
+    .swatch-label {
+      font-size: 10px;
+      text-align: center;
+      color: inherit;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
     .slider-container {
       display: flex;
@@ -162,26 +175,77 @@
     .slider-container input {
       flex-grow: 1;
     }
-
-    .visually-hidden {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      clip-path: inset(50%) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
-    }
-
-    #content h1 { margin: 0 0 6px; font-size: 20px; }
-    #content h2 { margin: 12px 0 6px; font-size: 16px; }
-    #content p, #content li { margin: 0 0 6px; font-size: 14px; color: #222; }
     :root {
       --slider-track: rgba(0, 0, 0, 0.1);
       --slider-thumb: #007bff;
+    }
+    .setting-checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .setting-checkbox label {
+      margin-right: 0;
+    }
+    .setting-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    #custom-color-pickers {
+      display: none;
+      margin-top: 4px;
+    }
+    #custom-color-pickers .color-picker-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    #custom-color-pickers .color-picker-row label {
+      margin-right: 0;
+      font-size: 13px;
+    }
+    #custom-color-pickers input[type="color"] {
+      width: 40px;
+      height: 25px;
+      border: none;
+      padding: 0;
+      background: none;
+      cursor: pointer;
+    }
+    .hint {
+      font-size: 12px;
+      margin-top: 6px;
+      color: #666;
+      border-top: 1px solid #eee;
+      padding-top: 4px;
+    }
+    kbd {
+      background: #e0e0e0;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      color: #333;
+    }
+    details {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+      border-top: 1px solid #eee;
+      padding-top: 4px;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 500;
+      outline: none;
+      user-select: none;
+    }
+    details[open] summary {
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -195,12 +259,21 @@
     </button>
   </div>
 
-  <!-- --- Settings Modal --- -->
   <div id="settings-modal">
     <h3>Settings</h3>
     <div class="setting">
       <label>Theme</label>
       <div id="color-swatches" class="color-swatches"></div>
+      <div id="custom-color-pickers">
+        <div class="color-picker-row">
+          <label for="custom-background">Background</label>
+          <input type="color" id="custom-background" value="#ffffff">
+        </div>
+        <div class="color-picker-row">
+          <label for="custom-hand">Hands</label>
+          <input type="color" id="custom-hand" value="#000000">
+        </div>
+      </div>
     </div>
     <div class="setting">
       <label for="transition-slider">Transition Speed</label>
@@ -208,44 +281,107 @@
         <input type="range" id="transition-slider" min="1" max="20" step="0.2">
         <span id="transition-value">20.0s</span>
       </div>
-      <div style="font-size: 12px; margin-top: 12px; color: #666; border-top: 1px solid #eee; padding-top: 8px;">
-        Press <kbd style="background: #e0e0e0; border-radius: 4px; padding: 2px 6px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">F</kbd> to Show/Hide Settings
-     </div>
-      <div style="font-size: 12px; margin-top: 12px; color: #666; border-top: 1px solid #eee; padding-top: 8px;">
-        Press <kbd style="background: #e0e0e0; border-radius: 4px; padding: 2px 6px; font-weight: bold; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">Space</kbd> to see time
-     </div>
+      <details>
+        <summary>Keyboard shortcuts</summary>
+        <div class="hint">
+          Press <kbd>C</kbd> to change pattern
+        </div>
+        <div class="hint">
+          Press <kbd>F</kbd> to Show/Hide Settings
+        </div>
+        <div class="hint">
+          Press <kbd>M</kbd> to follow cursor / resume animation
+        </div>
+        <div class="hint">
+          Press <kbd>R</kbd> for random theme
+        </div>
+        <div class="hint">
+          Press <kbd>Space</kbd> to see time
+        </div>
+      </details>
     </div>
   </div>
 
 <script>
 (() => {
-  
   const Cols = 16;
   const Rows = 8;
 
   let backColor   = { r: 255, g: 255, b: 255, a: 1.0 };
   let handColor   = { r:   0, g:   0, b:   0, a: 1.0 };
-  let shadowColor = { r: 200, g: 200, b: 200, a: 0.61 }; // used for clock face rim
+  let shadowColor = { r: 200, g: 200, b: 200, a: 0.61 }; 
 
   let TransitionSeconds = 20.0;
+  let is24Hour = true;
 
-  // FPS cap
   const MAX_FPS = 20;
   const FRAME_INTERVAL = 1 / MAX_FPS;
   let lastRenderSec = 0;
 
-  // Hand shadow
   const HAND_SHADOW_OFFSET = 4;
   const HAND_SHADOW_BLUR   = 8;
   const HAND_SHADOW_ALPHA  = 0.30;
+  const MOUSE_FOLLOW_SMOOTHING = 0.03;
 
-  // Pattern cadence
   let PatternPeriodSeconds = TransitionSeconds;
-  const totalPattern = 8;
-  let patternIndex = 3;
+  const totalPattern = 12;
+  let patternIndex = 4;
+
+  let colorTransition = null;
 
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp  = (a, b, t) => a + (b - a) * t;
+  const lerpColor = (c1, c2, t) => ({
+    r: Math.round(lerp(c1.r, c2.r, t)),
+    g: Math.round(lerp(c1.g, c2.g, t)),
+    b: Math.round(lerp(c1.b, c2.b, t)),
+    a: lerp(c1.a, c2.a, t)
+  });
+
+  function startColorTransition(targetBack, targetHand, targetShadow) {
+    colorTransition = {
+      startBack: { ...backColor },
+      startHand: { ...handColor },
+      startShadow: { ...shadowColor },
+      targetBack: { ...targetBack },
+      targetHand: { ...targetHand },
+      targetShadow: { ...targetShadow },
+      startSec: performance.now() / 1000,
+      duration: 0.4
+    };
+  }
+
+  function deriveShadow(bg) {
+    const factor = 0.6;
+    return {
+      r: Math.round(bg.r * factor),
+      g: Math.round(bg.g * factor),
+      b: Math.round(bg.b * factor),
+      a: 0.6
+    };
+  }
+
+  function updateModalTheme() {
+    const modal = document.getElementById('settings-modal');
+    if (!modal) return;
+
+    const bgColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+    modal.style.backgroundColor = bgColor;
+
+    const luminance = (0.299 * backColor.r + 0.587 * backColor.g + 0.114 * backColor.b) / 255;
+    const textColor = luminance > 0.5 ? '#333' : '#f0f0f0';
+    modal.style.color = textColor;
+    modal.style.borderColor = luminance > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)';
+
+    const trackColor = luminance > 0.5 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
+    document.documentElement.style.setProperty('--slider-track', trackColor);
+
+    const headings = modal.querySelectorAll('h3, label');
+    headings.forEach(el => el.style.color = textColor);
+
+    const hints = modal.querySelectorAll('.hint, details, summary');
+    hints.forEach(h => h.style.color = textColor);
+  }
 
   function normalizeDeg(deg) {
     deg %= 360;
@@ -271,7 +407,6 @@
     return t * t * (3 - 2 * t);
   }
 
-  // Clock state patterns
   const clockStates = [
     { a: 0,   b: 0   },
     { a: 0,   b: 90  },
@@ -289,16 +424,16 @@
   ];
 
   const numberPatterns = [
-    [[5,6,8],[2,7,2],[2,2,2],[2,2,2],[2,0,2],[1,6,3]],  // 0
-    [[12,5,8],[12,2,2],[12,2,2],[12,2,2],[12,2,2],[12,1,3]], // 1
-    [[5,6,8],[1,8,2],[5,3,2],[2,5,3],[2,1,8],[1,6,3]],  // 2
-    [[5,6,8],[1,8,2],[5,3,2],[1,8,2],[5,3,2],[1,6,3]],  // 3
-    [[5,8,8],[2,2,2],[2,1,2],[1,8,2],[12,2,2],[12,1,3]], // 4
-    [[5,6,8],[2,5,3],[2,1,8],[1,8,2],[5,3,2],[1,6,3]],  // 5
-    [[5,6,8],[2,5,3],[2,1,8],[2,7,2],[2,0,2],[1,6,3]],  // 6
-    [[5,6,8],[1,8,2],[12,10,10],[11,11,12],[2,2,12],[1,3,12]], // 7
-    [[5,6,8],[2,7,2],[2,0,2],[2,7,2],[2,0,2],[1,6,3]],  // 8
-    [[5,6,8],[2,7,2],[2,0,2],[1,8,2],[5,3,2],[1,6,3]],  // 9
+    [[5,6,8],[2,7,2],[2,2,2],[2,2,2],[2,0,2],[1,6,3]],
+    [[12,5,8],[12,2,2],[12,2,2],[12,2,2],[12,2,2],[12,1,3]],
+    [[5,6,8],[1,8,2],[5,3,2],[2,5,3],[2,1,8],[1,6,3]],
+    [[5,6,8],[1,8,2],[5,3,2],[1,8,2],[5,3,2],[1,6,3]],
+    [[5,8,8],[2,2,2],[2,1,2],[1,8,2],[12,2,2],[12,1,3]],
+    [[5,6,8],[2,5,3],[2,1,8],[1,8,2],[5,3,2],[1,6,3]],
+    [[5,6,8],[2,5,3],[2,1,8],[2,7,2],[2,0,2],[1,6,3]],
+    [[5,6,8],[1,8,2],[12,10,10],[11,11,12],[2,2,12],[1,3,12]],
+    [[5,6,8],[2,7,2],[2,0,2],[2,7,2],[2,0,2],[1,6,3]],
+    [[5,6,8],[2,7,2],[2,0,2],[1,8,2],[5,3,2],[1,6,3]],
   ];
 
   function getClockStateForNumber(num, rowInDigit, colInDigit) {
@@ -311,7 +446,11 @@
     const timePosY = 1;
     const pattern = new Array(Cols * Rows);
 
-    const hours = date.getHours();
+    let hours = date.getHours();
+    if (!is24Hour) {
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+    }
     const minutes = date.getMinutes();
 
     const hTens = Math.floor(hours / 10);
@@ -585,7 +724,6 @@
         let aDeg = 0, bDeg = 90;
 
         if (pIndex === 0) {
-          //[aDeg, bDeg] = getPatternAngles(row, col, Rows, Cols, false);
           [aDeg, bDeg] = getPatternVector(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
         }
@@ -595,12 +733,10 @@
         }
         else if (pIndex === 2) {
           [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols);
-          
           PatternPeriodSeconds = TransitionSeconds;
         }
         else if (pIndex === 3) {
           [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, 0.5, 0.5, 110);
-          //[aDeg, bDeg] = getPatternVector(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
         }
         else if (pIndex === 4) {
@@ -657,6 +793,161 @@
           bDeg = normalizeDeg(aDeg + 180);
           PatternPeriodSeconds = TransitionSeconds;
         }
+        else if (pIndex === 8) {
+          const layer = Math.min(
+            row,
+            col,
+            Rows - 1 - row,
+            Cols - 1 - col
+          );
+
+          const isTopLeft     = (row === layer && col === layer);
+          const isTopRight    = (row === layer && col === Cols - 1 - layer);
+          const isBottomLeft  = (row === Rows - 1 - layer && col === layer);
+          const isBottomRight = (row === Rows - 1 - layer && col === Cols - 1 - layer);
+
+          if (isTopLeft) {
+            aDeg = 90;
+            bDeg = 180;
+          }
+          else if (isTopRight) {
+            aDeg = 180;
+            bDeg = 270;
+          }
+          else if (isBottomLeft) {
+            aDeg = 0;
+            bDeg = 90;
+          }
+          else if (isBottomRight) {
+            aDeg = 0;
+            bDeg = 270;
+          }
+          else if (row === layer || row === Rows - 1 - layer) {
+            aDeg = 90;
+            bDeg = 270;
+          }
+          else if (col === layer || col === Cols - 1 - layer) {
+            aDeg = 0;
+            bDeg = 180;
+          }
+          else {
+            aDeg = 0;
+            bDeg = 90;
+          }
+
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
+        }
+        else if (pIndex === 9) {
+          const halfRows = Rows / 2;
+          const halfCols = Cols / 2;
+
+          const qRow = Math.floor(row / halfRows);
+          const qCol = Math.floor(col / halfCols);
+          const lRow = row % halfRows;
+          const lCol = col % halfCols;
+
+          const onOuterTop    = lRow === 0;
+          const onOuterBottom = lRow === halfRows - 1;
+          const onOuterLeft   = lCol === 0;
+          const onOuterRight  = lCol === halfCols - 1;
+
+          const innerMargin = 1;
+          const onInnerTop    = lRow === innerMargin;
+          const onInnerBottom = lRow === halfRows - 1 - innerMargin;
+          const onInnerLeft   = lCol === innerMargin;
+          const onInnerRight  = lCol === halfCols - 1 - innerMargin;
+
+          const isOuterTopLeft     = onOuterTop && onOuterLeft;
+          const isOuterTopRight    = onOuterTop && onOuterRight;
+          const isOuterBottomLeft  = onOuterBottom && onOuterLeft;
+          const isOuterBottomRight = onOuterBottom && onOuterRight;
+
+          const isInnerTopLeft     = onInnerTop && onInnerLeft;
+          const isInnerTopRight    = onInnerTop && onInnerRight;
+          const isInnerBottomLeft  = onInnerBottom && onInnerLeft;
+          const isInnerBottomRight = onInnerBottom && onInnerRight;
+
+          function setCornerAngles(isTL, isTR, isBL, isBR) {
+            if (isTL) {
+              aDeg = 90;
+              bDeg = 180;
+            }
+            else if (isTR) {
+              aDeg = 180;
+              bDeg = 270;
+            }
+            else if (isBL) {
+              aDeg = 0;
+              bDeg = 90;
+            }
+            else if (isBR) {
+              aDeg = 0;
+              bDeg = 270;
+            }
+          }
+
+          if (isOuterTopLeft || isOuterTopRight || isOuterBottomLeft || isOuterBottomRight) {
+            setCornerAngles(isOuterTopLeft, isOuterTopRight, isOuterBottomLeft, isOuterBottomRight);
+          }
+          else if (onOuterTop || onOuterBottom) {
+            aDeg = 90;
+            bDeg = 270;
+          }
+          else if (onOuterLeft || onOuterRight) {
+            aDeg = 0;
+            bDeg = 180;
+          }
+          else if (isInnerTopLeft || isInnerTopRight || isInnerBottomLeft || isInnerBottomRight) {
+            setCornerAngles(isInnerTopLeft, isInnerTopRight, isInnerBottomLeft, isInnerBottomRight);
+          }
+          else if (onInnerTop || onInnerBottom) {
+            aDeg = 90;
+            bDeg = 270;
+          }
+          else if (onInnerLeft || onInnerRight) {
+            aDeg = 0;
+            bDeg = 180;
+          }
+          else {
+            aDeg = 0;
+            bDeg = 0;
+          }
+
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
+        }
+        else if (pIndex === 10) {
+          const localRow = row % 2;
+          const localCol = col % 2;
+
+          if (localRow === 0 && localCol === 0) {
+            aDeg = 90;
+            bDeg = 180;
+          }
+          else if (localRow === 0 && localCol === 1) {
+            aDeg = 180;
+            bDeg = 270;
+          }
+          else if (localRow === 1 && localCol === 0) {
+            aDeg = 0;
+            bDeg = 90;
+          }
+          else if (localRow === 1 && localCol === 1) {
+            aDeg = 0;
+            bDeg = 270;
+          }
+
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
+        }
+        else if (pIndex === 11) {
+          if ((row % 2) === (col % 2)) {
+            aDeg = 135;
+            bDeg = 315;
+          } else {
+            aDeg = 45;
+            bDeg = 225;
+          }
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
+        }
 
         clocks[idx].setTargets(aDeg, bDeg, TransitionSeconds, nowSec);
         idx++;
@@ -672,6 +963,10 @@
   const clockFaceCanvas = document.createElement('canvas');
   const clockFaceCtx = clockFaceCanvas.getContext('2d');
   let isAnimating = true;
+  let mouseFollowActive = false;
+  let lastPatternIndexBeforeMouse = 3;
+  let mouseCanvasX = -1000;
+  let mouseCanvasY = -1000;
 
   function rgba(c) {
     return `rgba(${c.r},${c.g},${c.b},${c.a})`;
@@ -681,7 +976,7 @@
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const PANEL_H = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-panel-height')) || 36;
     const DOCK_W  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-width')) || 68;
-    // Work in CSS pixels first
+
     const maxW = (window.innerWidth - DOCK_W) * 0.92;
     const maxH = (window.innerHeight - PANEL_H) * 0.92;
 
@@ -697,12 +992,17 @@
     const bufW = Math.floor(cssW * dpr);
     const bufH = Math.floor(cssH * dpr);
 
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      mouseCanvasX = e.clientX - rect.left;
+      mouseCanvasY = e.clientY - rect.top;
+    });
+
     if (canvas.width === bufW && canvas.height === bufH) return;
 
     canvas.width = bufW;
     canvas.height = bufH;
 
-    // Draw using CSS pixel coordinates
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     pad = cellSize * 0.03;
@@ -812,7 +1112,6 @@
         drawHand(cx, cy, c.angleB, lenB, thickB, shadowOffsetPx*0.8, shadowBlurPx);
         drawHand(cx, cy, c.angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
 
-        // hub
         ctx.beginPath();
         ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
         ctx.closePath();
@@ -828,18 +1127,56 @@
     requestAnimationFrame(tick);
     const nowSec = tsMs / 1000;
 
-    if (nowSec - lastRenderSec < FRAME_INTERVAL && !isAnimating) {
-      return;
+    if (colorTransition) {
+      const t = clamp((nowSec - colorTransition.startSec) / colorTransition.duration, 0, 1);
+      const eased = smoothStep(t);
+      backColor = lerpColor(colorTransition.startBack, colorTransition.targetBack, eased);
+      handColor = lerpColor(colorTransition.startHand, colorTransition.targetHand, eased);
+      shadowColor = lerpColor(colorTransition.startShadow, colorTransition.targetShadow, eased);
+      document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+      rerenderClockFace();
+      updateModalTheme();
+      if (t >= 1) {
+        backColor = { ...colorTransition.targetBack };
+        handColor = { ...colorTransition.targetHand };
+        shadowColor = { ...colorTransition.targetShadow };
+        colorTransition = null;
+        rerenderClockFace();
+        updateModalTheme();
+      }
     }
 
-    if (nowSec >= nextPatternSwitchSec) {
-      patternIndex = (patternIndex + 1) % totalPattern;
-      applyPattern(patternIndex, nowSec);
-      isAnimating = true;
+    if (!mouseFollowActive) {
+      if (nowSec >= nextPatternSwitchSec) {
+        patternIndex = (patternIndex + 1) % totalPattern;
+        applyPattern(patternIndex, nowSec);
+        isAnimating = true;
+        do {
+          nextPatternSwitchSec += PatternPeriodSeconds;
+        } while (nowSec >= nextPatternSwitchSec);
+      }
+    } else {
+      let idx = 0;
+      for (let row = 0; row < Rows; row++) {
+        for (let col = 0; col < Cols; col++) {
+          const cx = pad + col * cellSize + cellSize / 2;
+          const cy = pad + row * cellSize + cellSize / 2;
+          const dx = mouseCanvasX - cx;
+          const dy = mouseCanvasY - cy;
+          let targetAngle = Math.atan2(dx, -dy) * 180 / Math.PI;
+          targetAngle = normalizeDeg(targetAngle);
 
-      do {
-        nextPatternSwitchSec += PatternPeriodSeconds;
-      } while (nowSec >= nextPatternSwitchSec);
+          const currentAngle = clocks[idx].angleA;
+          const delta = shortestDeltaDeg(currentAngle, targetAngle);
+          const newAngle = normalizeDeg(currentAngle + delta * MOUSE_FOLLOW_SMOOTHING);
+          clocks[idx].angleA = newAngle;
+          clocks[idx].angleB = newAngle;
+          clocks[idx].animA = null;
+          clocks[idx].animB = null;
+          idx++;
+        }
+      }
+      isAnimating = true;
     }
 
     let anyMoving = false;
@@ -848,14 +1185,11 @@
         c.update(nowSec);
         if (c.animA || c.animB) anyMoving = true;
       }
-      isAnimating = anyMoving;
+      isAnimating = anyMoving || mouseFollowActive;
     }
 
-    if (nowSec - lastRenderSec < FRAME_INTERVAL) {
-      return;
-    }
+    if (nowSec - lastRenderSec < FRAME_INTERVAL) return;
     lastRenderSec = nowSec;
-
     draw(nowSec);
   }
 
@@ -865,73 +1199,184 @@
     const transitionSlider = document.getElementById('transition-slider');
     const transitionValue = document.getElementById('transition-value');
     const colorSwatchesContainer = document.getElementById('color-swatches');
+    const customPickers = document.getElementById('custom-color-pickers');
+    const customBackgroundInput = document.getElementById('custom-background');
+    const customHandInput = document.getElementById('custom-hand');
 
     const themes = [
       { name: 'Black on White', hand: { r: 0, g: 0, b: 0, a: 1.0 }, back: { r: 255, g: 255, b: 255, a: 1.0 }, shadow: { r: 200, g: 200, b: 200, a: 0.61 } },
       { name: 'White on Black', hand: { r: 255, g: 255, b: 255, a: 1.0 }, back: { r: 0, g: 0, b: 0, a: 1.0 }, shadow: { r: 50, g: 50, b: 50, a: 0.61 } },
       { name: 'Navy', hand: { r: 255, g: 255, b: 255, a: 1.0 }, back: { r: 24, g: 34, b: 65, a: 1.0 }, shadow: { r: 10, g: 15, b: 20, a: 0.61 } },
       { name: 'Forest', hand: { r: 230, g: 230, b: 230, a: 1.0 }, back: { r: 50, g: 61, b: 54, a: 1.0 }, shadow: { r: 20, g: 25, b: 22, a: 0.61 } },
-      { name: 'Navy on White', hand: { r: 24, g: 34, b: 65, a: 1.0 }, back: { r: 255, g: 255, b: 255, a: 1.0 }, shadow: { r: 200, g: 200, b: 200, a: 0.61 } },
+      { name: 'Sand', hand: { r: 70, g: 50, b: 30, a: 1.0 }, back: { r: 240, g: 225, b: 210, a: 1.0 }, shadow: { r: 180, g: 160, b: 140, a: 0.6 } },
       { name: 'Gold', hand: { r: 50, g: 40, b: 0, a: 1.0 }, back: { r: 255, g: 215, b: 0, a: 1.0 }, shadow: { r: 200, g: 160, b: 0, a: 0.61 } },
     ];
-    
-   handColor = themes[3].hand;
-   backColor = themes[3].back;
-   shadowColor = themes[3].shadow;
-   document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
-   rerenderClockFace();
-   if (typeof updateModalTheme === 'function') updateModalTheme();
-   
+
+    let customBack = { r: 255, g: 255, b: 255, a: 1.0 };
+    let customHand = { r: 0, g: 0, b: 0, a: 1.0 };
     let activeThemeIndex = 3;
-    
-    function updateModalTheme() {
-      const modal = document.getElementById('settings-modal');
-      if (!modal) return;
-      
-      const bgColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
-      modal.style.backgroundColor = bgColor;
+    let isCustomActive = false;
 
-      const luminance = (0.299 * backColor.r + 0.587 * backColor.g + 0.114 * backColor.b) / 255;
-      const textColor = luminance > 0.5 ? '#333' : '#f0f0f0';
-      modal.style.color = textColor;
-      modal.style.borderColor = luminance > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,2
-      const trackColor = luminance > 0.5 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
-      document.documentElement.style.setProperty('--slider-track', trackColor);
+    try {
+      const saved = localStorage.getItem('clockTheme');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.isCustom) {
+          isCustomActive = true;
+          customBack = parsed.back;
+          customHand = parsed.hand;
+          backColor = { ...customBack };
+          handColor = { ...customHand };
+          shadowColor = deriveShadow(backColor);
+        } else if (parsed.index >= 0 && parsed.index < themes.length) {
+          activeThemeIndex = parsed.index;
+          const theme = themes[activeThemeIndex];
+          backColor = { ...theme.back };
+          handColor = { ...theme.hand };
+          shadowColor = { ...theme.shadow };
+        }
+      }
+    } catch (e) {}
 
-      const headings = modal.querySelectorAll('h3, label');
-      headings.forEach(el => el.style.color = textColor);
+    if (!isCustomActive && backColor.r === 255 && backColor.g === 255 && backColor.b === 255 && handColor.r === 0) {
+      const theme = themes[activeThemeIndex];
+      backColor = { ...theme.back };
+      handColor = { ...theme.hand };
+      shadowColor = { ...theme.shadow };
+    }
+
+    function hexToRgb(hex) {
+      const r = parseInt(hex.slice(1,3), 16);
+      const g = parseInt(hex.slice(3,5), 16);
+      const b = parseInt(hex.slice(5,7), 16);
+      return { r, g, b, a: 1.0 };
+    }
+
+    function rgbToHex(r,g,b) {
+      return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+    }
+
+    function applyColorsInstant() {
+      document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+      rerenderClockFace();
+      updateModalTheme();
+      isAnimating = true;
     }
 
     themes.forEach((theme, index) => {
+      const container = document.createElement('div');
+      container.className = 'swatch-container';
+
       const swatch = document.createElement('div');
       swatch.className = 'color-swatch';
       swatch.style.backgroundColor = `rgb(${theme.back.r}, ${theme.back.g}, ${theme.back.b})`;
       swatch.style.borderColor = `rgb(${theme.hand.r}, ${theme.hand.g}, ${theme.hand.b})`;
       swatch.title = theme.name;
-      if (index === activeThemeIndex) {
+
+      const label = document.createElement('span');
+      label.className = 'swatch-label';
+      label.textContent = theme.name;
+
+      container.appendChild(swatch);
+      container.appendChild(label);
+
+      if (index === activeThemeIndex && !isCustomActive) {
         swatch.classList.add('active');
       }
+
       swatch.addEventListener('click', () => {
         activeThemeIndex = index;
-        handColor = themes[index].hand;
-        backColor = themes[index].back;
-        shadowColor = themes[index].shadow;
-        
+        isCustomActive = false;
         document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
         swatch.classList.add('active');
+        customPickers.style.display = 'none';
 
-        console.log(`Switched to theme: ${theme.name}`);
-        console.log(`Hand Color: rgb(${handColor.r}, ${handColor.g}, ${handColor.b})`);
-        console.log(`Back Color: rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`);
-        console.log(`Shadow Color: rgb(${shadowColor.r}, ${shadowColor.g}, ${shadowColor.b})`);
+        startColorTransition(theme.back, theme.hand, theme.shadow);
 
-        document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
-
-        rerenderClockFace();
-        isAnimating = true;
-        updateModalTheme();
+        try {
+          localStorage.setItem('clockTheme', JSON.stringify({ index: activeThemeIndex, isCustom: false }));
+        } catch (e) {}
       });
-      colorSwatchesContainer.appendChild(swatch);
+
+      colorSwatchesContainer.appendChild(container);
+    });
+
+    const customContainer = document.createElement('div');
+    customContainer.className = 'swatch-container';
+
+    const customSwatch = document.createElement('div');
+    customSwatch.className = 'color-swatch';
+    customSwatch.style.background = 'linear-gradient(135deg, #ff0000, #00ff00, #0000ff, #ff0000)';
+    customSwatch.style.borderColor = '#888';
+    customSwatch.title = 'Custom';
+
+    const customLabel = document.createElement('span');
+    customLabel.className = 'swatch-label';
+    customLabel.textContent = 'Custom';
+
+    customContainer.appendChild(customSwatch);
+    customContainer.appendChild(customLabel);
+
+    if (isCustomActive) {
+      customSwatch.classList.add('active');
+      customPickers.style.display = 'block';
+      customBackgroundInput.value = rgbToHex(customBack.r, customBack.g, customBack.b);
+      customHandInput.value = rgbToHex(customHand.r, customHand.g, customHand.b);
+    }
+
+    customSwatch.addEventListener('click', () => {
+      isCustomActive = true;
+      activeThemeIndex = -1;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      customSwatch.classList.add('active');
+      customPickers.style.display = 'block';
+
+      customBackgroundInput.value = rgbToHex(backColor.r, backColor.g, backColor.b);
+      customHandInput.value = rgbToHex(handColor.r, handColor.g, handColor.b);
+
+      try {
+        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
+      } catch (e) {}
+    });
+
+    colorSwatchesContainer.appendChild(customContainer);
+
+    customBackgroundInput.addEventListener('input', (e) => {
+      if (!isCustomActive) return;
+      const rgb = hexToRgb(e.target.value);
+      startColorTransition(rgb, handColor, deriveShadow(rgb));
+      customSwatch.style.background = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      try {
+        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
+      } catch (err) {}
+    });
+
+    customHandInput.addEventListener('input', (e) => {
+      if (!isCustomActive) return;
+      const rgb = hexToRgb(e.target.value);
+      startColorTransition(backColor, rgb, shadowColor);
+      customSwatch.style.borderColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+      try {
+        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
+      } catch (err) {}
+    });
+
+    const hourFormatSetting = document.createElement('div');
+    hourFormatSetting.className = 'setting setting-checkbox';
+    hourFormatSetting.innerHTML = `
+      <label for="hour-format-toggle">24‑hour format</label>
+      <input type="checkbox" id="hour-format-toggle" ${is24Hour ? 'checked' : ''}>
+    `;
+    const themeSetting = document.querySelector('#settings-modal .setting');
+    themeSetting.after(hourFormatSetting);
+
+    document.getElementById('hour-format-toggle').addEventListener('change', (e) => {
+      is24Hour = e.target.checked;
+      if (patternIndex === 4) {
+        const nowSec = performance.now() / 1000;
+        applyPattern(4, nowSec);
+        isAnimating = true;
+      }
     });
 
     document.addEventListener('fullscreenchange', () => {
@@ -939,41 +1384,107 @@
       if (document.fullscreenElement) {
         controls.style.display = 'none';
         settingsModal.style.display = 'none';
-        infoModal.style.display = 'none';
       } else {
         controls.style.display = 'flex';
       }
     });
-    
+
     settingsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
       settingsModal.style.display = isHidden ? 'block' : 'none';
-      infoModal.style.display = 'none';
     });
-    
+
     transitionSlider.value = TransitionSeconds;
     transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
     transitionSlider.addEventListener('input', () => {
       TransitionSeconds = parseFloat(transitionSlider.value);
       transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
     });
+
+    applyColorsInstant();
   }
 
   window.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    const nowSec = performance.now() / 1000;
-    patternIndex = 4;
-    applyPattern(patternIndex, nowSec);
-    nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
-    isAnimating = true;
-    e.preventDefault();
-    } else if (e.code === 'KeyF') {
+    if (e.code === 'Space') {
+      const nowSec = performance.now() / 1000;
+      patternIndex = 4;
+      applyPattern(patternIndex, nowSec);
+      nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
+      isAnimating = true;
+      e.preventDefault();
+    }
+    else if (e.code === 'KeyC') {
+      const nowSec = performance.now() / 1000;
+      if (!mouseFollowActive) {
+        patternIndex = (patternIndex + 1) % totalPattern;
+        applyPattern(patternIndex, nowSec);
+        nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
+        isAnimating = true;
+      }
+      e.preventDefault();
+    }
+    else if (e.code === 'KeyF') {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.();
       } else {
         document.exitFullscreen?.();
       }
+    } 
+    else if (e.code === 'KeyH') {
+      const settingsModal = document.getElementById('settings-modal');
+      if (settingsModal) {
+        const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
+        settingsModal.style.display = isHidden ? 'block' : 'none';
+      }
+      e.preventDefault();
+    }
+    else if (e.code === 'KeyM') {
+      const nowSec = performance.now() / 1000;
+      if (!mouseFollowActive) {
+        lastPatternIndexBeforeMouse = patternIndex;
+        mouseFollowActive = true;
+        isAnimating = true;
+      } else {
+        mouseFollowActive = false;
+        applyPattern(lastPatternIndexBeforeMouse, nowSec);
+        nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
+        isAnimating = true;
+      }
+      e.preventDefault();
+    }
+    else if (e.code === 'KeyR') {
+      const randomColor = () => ({
+        r: Math.floor(Math.random() * 256),
+        g: Math.floor(Math.random() * 256),
+        b: Math.floor(Math.random() * 256),
+        a: 1.0
+      });
+      const newBack = randomColor();
+      const newHand = randomColor();
+      startColorTransition(newBack, newHand, deriveShadow(newBack));
+
+      const customSwatch = document.querySelector('.color-swatch[title="Custom"]');
+      if (customSwatch) {
+        customSwatch.style.background = `rgb(${newBack.r}, ${newBack.g}, ${newBack.b})`;
+        customSwatch.style.borderColor = `rgb(${newHand.r}, ${newHand.g}, ${newHand.b})`;
+      }
+      const customBgInput = document.getElementById('custom-background');
+      const customHandInput = document.getElementById('custom-hand');
+      if (customBgInput) customBgInput.value = rgbToHex(newBack.r, newBack.g, newBack.b);
+      if (customHandInput) customHandInput.value = rgbToHex(newHand.r, newHand.g, newHand.b);
+
+      isCustomActive = true;
+      activeThemeIndex = -1;
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      if (customSwatch) customSwatch.classList.add('active');
+      const customPickers = document.getElementById('custom-color-pickers');
+      if (customPickers) customPickers.style.display = 'block';
+
+      try {
+        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: newBack, hand: newHand }));
+      } catch (err) {}
+      e.preventDefault();
     }
   });
 
@@ -981,7 +1492,8 @@
 
   createClocks();
   resize();
-  document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+  
+  document.getElementById('clock-container').style.backgroundColor = '#ffffff';
 
   const nowSec = performance.now() / 1000;
   patternIndex = 4;
@@ -992,7 +1504,6 @@
 
   requestAnimationFrame(tick);
   setupControls();
-  updateModalTheme();
 })();
 </script>
 </body>
