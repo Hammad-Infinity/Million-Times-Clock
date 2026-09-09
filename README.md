@@ -1,13 +1,7 @@
 #  Artistic Clock Visualizations
 
-Two beautiful, interactive HTML-based clock displays with animated digit representations.
+A beautiful, interactive HTML-based clock displays with animated digit representations.
 
-##  Files
-
-| File | Theme | Description |
-|------|-------|-------------|
-| **clock.py** | Light | Clean white background with modern styling |
-| **wallpaper.py** | Dark | Dark theme with custom wallpaper support |
 
 ## Features
 
@@ -22,45 +16,35 @@ Two beautiful, interactive HTML-based clock displays with animated digit represe
 - Theme switcher in settings
 
  **Interactive Controls**
-- **F Key** - Show/Hide Settings panel
+- **F Key** - fullscreen mode / show/hide menu ( If set as wallpaper )
 - **Space Key** - Reveal current time
+- **M Key** - follow cursor / resume animation
+- **R Key** - Change Random Theme
 - Settings button in top-right corner
 
  **Visual Effects**
 - Animated hand movements with smooth interpolation
+- 12 animations patterns before showing time
 - Shadow effects for depth
 - Canvas-based rendering at 20 FPS
 - Responsive design
 
 ##  Usage
-
-### For `clock.py` (Light Theme)
 1. Open `clock.py` in a web browser
 2. Clock displays in center of screen with white background
-3. Click settings icon or press `F` to customize
-
-### For `wallpaper.py` (Dark Theme)
-1. Open `wallpaper.py` in a web browser
-2. Place your wallpaper image as `wallpaper.jpg` in same directory
-3. Dark theme clock displays over wallpaper
-4. Press `F` for settings
+3. Click settings icon to customize
 
 ## ⚙️ Settings
 
 **Theme Colors**
-- 9 color theme options available
+- 6 color theme options available
+- 1 custom theme option
+- random theme with R Key
 - Click color swatches to switch
 
 **Transition Speed**
 - Range: 1 - 20 seconds
 - Controls animation smoothness between time states
-
-##  Customization
-
-### Change Wallpaper (wallpaper.py)
-```css
-background-image: url('your-image.jpg');
-```
 
 ### Modify Colors
 Edit these values in code:
@@ -90,16 +74,15 @@ The clock uses a 16x8 grid system to represent time digits:
 
 | Key | Action |
 |-----|--------|
-| `F` | Toggle Settings |
+| `F` | Toggle fullscreen / show/hide menu ( If set as wallpaper ) |
+| `M` | Follow Cursor / Resume Animation |
+| `R` | Randomize Theme |
 | `Space` | Show Current Time |
 
 ## 💡 Tips
 
 - Use full screen for best experience (F11)
-- Choose colors that contrast with your wallpaper
 - Adjust transition speed based on preference
-- Works great as desktop background preview
-
----
+- Works great as desktop background preview or as wallpaper
 
 **Built with Canvas API & Vanilla JavaScript**
