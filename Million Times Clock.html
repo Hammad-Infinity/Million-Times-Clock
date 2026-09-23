@@ -15,7 +15,6 @@
     --text-dim: #9aa0a8;
     --border: #3a3d42;
     --accent: #6ad1ff;
-    --accent-dim: #3a8fbf;
     --shadow: rgba(0,0,0,0.45);
   }
   html.theme-light {
@@ -26,7 +25,6 @@
     --text-dim: #5a6068;
     --border: #d6d8db;
     --accent: #007aff;
-    --accent-dim: #4a98e0;
     --shadow: rgba(0,0,0,0.18);
   }
   html, body {
@@ -56,13 +54,25 @@
     canvas {
       display: block;
     }
-    .controls {
+    #hud {
       position: fixed;
       top: 16px;
-      right: 16px;
       display: flex;
-      gap: 6px;
+      flex-direction: column;
+      gap: 10px;
       z-index: 999;
+      transition: left 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+                  right 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+                  top 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    #hud.side-right { right: 16px; left: auto;  align-items: flex-end; }
+    #hud.side-left  { left: 16px;  right: auto; align-items: flex-start; }
+    #hud.dragging   { transition: none; align-items: flex-start; }
+    .controls {
+      position: static;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
     .controls button {
       background: var(--bg-panel);
@@ -90,7 +100,6 @@
       height: 20px;
       fill: currentColor;
     }
-
     .theme-pill {
       display: flex;
       gap: 0;
@@ -121,9 +130,7 @@
     }
     #settings-modal {
       display: none;
-      position: fixed;
-      top: 64px;
-      right: 10px;
+      position: static;
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -131,14 +138,13 @@
       box-shadow: 0 12px 32px var(--shadow);
       z-index: 1000;
       width: 280px;
+      max-height: calc(100vh - 90px);
+      overflow-y: auto;
       animation: modalFadeIn 0.18s ease;
       cursor: grab;
-      transition: left 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
-                  top  0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
     }
-    #settings-modal.dragging {
+    #hud.dragging #settings-modal {
       cursor: grabbing;
-      transition: none;
     }
     @keyframes modalFadeIn {
       from { opacity: 0; transform: translateY(-6px); }
@@ -257,43 +263,6 @@
       color: #0a0a0a;
       border-color: var(--accent);
     }
-    .hint {
-      font-size: 11px;
-      margin-top: 4px;
-      color: var(--text-dim);
-      line-height: 1.5;
-    }
-    kbd {
-      background: var(--bg-app);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-weight: 700;
-      font-size: 11px;
-      color: var(--text);
-      font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    }
-    details {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-    }
-    details summary {
-      cursor: pointer;
-      font-weight: 700;
-      color: var(--text-dim);
-      user-select: none;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-size: 11px;
-      outline: none;
-    }
-    details[open] summary {
-      margin-bottom: 6px;
-    }
-
-    /* ---- Credit row at the end of the settings menu ---- */
     .credit {
       display: flex;
       align-items: center;
@@ -302,7 +271,6 @@
       padding-top: 12px;
       border-top: 1px solid var(--border);
     }
-    /* GitHub-style circular avatar wrapper — inline SVG lives inside */
     .credit-avatar {
       width: 36px;
       height: 36px;
@@ -329,14 +297,22 @@
     .credit a:hover {
       text-decoration: underline;
     }
-    
-    .ripple-indicator { display: none; }
+    .setting-label-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .setting-label-row > label {
+      margin-bottom: 0;
+    }
   </style>
 </head>
 <body>
   <div id="clock-container">
     <canvas id="c" aria-label="Animated clock display showing the current time"></canvas>
   </div>
+  <div id="hud" class="side-right">
   <div class="controls">
     <button id="settings-btn" title="Settings">
       <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
@@ -362,6 +338,19 @@
         <button id="show-time-btn">Show time</button>
       </div>
     </div>
+    <div class="setting">
+      <div class="setting-label-row">
+        <label>Clock grid</label>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="cols-slider" min="8" max="24" step="1" value="24" aria-label="Columns">
+        <span id="cols-value">24</span>
+      </div>
+      <div class="slider-container" style="margin-top:8px;">
+        <input type="range" id="rows-slider" min="3" max="14" step="1" value="12" aria-label="Rows">
+        <span id="rows-value">12</span>
+      </div>
+    </div>
     <div class="setting setting-checkbox">
       <label for="hour-format-toggle">24‑hour format</label>
       <input type="checkbox" id="hour-format-toggle" checked>
@@ -380,11 +369,10 @@
       <label for="transition-slider">Transition Speed</label>
       <div class="slider-container">
         <input type="range" id="transition-slider" min="1" max="20" step="0.2">
-        <span id="transition-value">20.0s</span>
+        <span id="transition-value">1.0s</span>
       </div>
     </div>
 
-    <!-- Round profile icon (YOUR EXACT SVG, inline) + project name link, at the very end of settings -->
     <div class="credit">
       <span class="credit-avatar" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460">
@@ -430,11 +418,21 @@
       <a href="https://github.com/Hammad-Infinity/Million-Times-Clock" target="_blank" rel="noopener noreferrer">Million Times Clock</a>
     </div>
   </div>
-
+  </div>
 <script>
 (() => {
-  const Cols = 28;
-  const Rows = 14;
+  const COLS_MIN = 8;
+  const COLS_MAX = 24;
+  const ROWS_MIN = 3;
+  const ROWS_MAX = 14;
+  let Cols = 24;
+  let Rows = 12;
+  try {
+    const savedCols = parseInt(localStorage.getItem("clockGridCols"), 10);
+    const savedRows = parseInt(localStorage.getItem("clockGridRows"), 10);
+    if (savedCols >= COLS_MIN && savedCols <= COLS_MAX) Cols = savedCols;
+    if (savedRows >= ROWS_MIN && savedRows <= ROWS_MAX) Rows = savedRows;
+  } catch (e) {}
   let backColor = {
     r: 255,
     g: 255,
@@ -453,7 +451,7 @@
     b: 200,
     a: .61
   };
-  let TransitionSeconds = 20;
+  let TransitionSeconds = 1;
   let is24Hour = true;
   const MAX_FPS = 60;
   const FRAME_INTERVAL = 1 / MAX_FPS;
@@ -568,46 +566,452 @@
     a: 225,
     b: 225
   } ];
-  const numberPatterns = [ [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 2, 2 ], [ 2, 2, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 12, 5, 8 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 8, 8 ], [ 2, 2, 2 ], [ 2, 1, 2 ], [ 1, 8, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 12, 10, 10 ], [ 11, 11, 12 ], [ 2, 2, 12 ], [ 1, 3, 12 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ] ];
-  function getClockStateForNumber(num, rowInDigit, colInDigit) {
-    const idx = numberPatterns[num][rowInDigit][colInDigit];
-    return clockStates[idx];
-  }
-  const letterPatterns = {
-    A: [ [ 12, 12, 12, 12 ], [ 12, 12, 6, 12 ], [ 2, 6, 12, 2 ], [ 2, 0, 12, 2 ], [ 2, 12, 2, 2 ], [ 2, 12, 2, 2 ] ],
-    B: [ [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ] ],
-    C: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
-    D: [ [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ] ],
-    E: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
-    F: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
-    G: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 2, 7 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
-    H: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 6, 6, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ] ],
-    I: [ [ 6, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 6, 6, 6, 6 ] ],
-    J: [ [ 6, 6, 6, 6 ], [ 12, 12, 2, 12 ], [ 12, 12, 2, 12 ], [ 12, 12, 2, 12 ], [ 2, 12, 2, 12 ], [ 12, 6, 12, 12 ] ],
-    L: [ [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 6, 6, 6 ] ],
-    M: [ [ 2, 12, 12, 2 ], [ 2, 0, 12, 2 ], [ 2, 12, 0, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ] ],
-    N: [ [ 2, 12, 12, 2 ], [ 2, 6, 12, 2 ], [ 2, 12, 6, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 6 ], [ 2, 12, 12, 2 ] ],
-    O: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ] ],
-    P: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
-    R: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ], [ 2, 2, 12, 12 ], [ 2, 12, 2, 2 ] ],
-    S: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 12, 12, 2 ], [ 12, 12, 12, 2 ], [ 6, 6, 6, 12 ] ],
-    T: [ [ 6, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
-    U: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ] ],
-    V: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 6, 12, 12 ] ],
-    W: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 0, 0, 2 ], [ 2, 12, 12, 2 ] ],
-    Y: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ]
+
+  const handEdits = {
+    "letters:R": [
+      [ [90, 180], [90, 270], [90, 270], [180, 270] ],
+      [ [0, 180], [90, null], [270, null], [0, 180] ],
+      [ [0, 180], [90, 135], [90, 270], [0, 270] ],
+      [ [0, 180], [180, 135], [315, 135], [null, null] ],
+      [ [0, 180], [180, 0], [315, 135], [315, 135] ],
+      [ [0, 90], [0, 270], [null, null], [45, 315] ]
+    ],
+    "letters:M": [
+      [ [90, 180], [180, 270], [90, 180], [180, 270] ],
+      [ [0, 180], [0, 135], [0, 225], [0, 180] ],
+      [ [0, 180], [180, 135], [180, 225], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 90], [0, 270], [0, 90], [0, 270] ]
+    ],
+    "letters:W": [
+      [ [90, 180], [180, 270], [90, 180], [180, 270] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 180], [0, 45], [315, 0], [0, 180] ],
+      [ [0, 180], [180, 45], [180, 315], [0, 180] ],
+      [ [0, 90], [0, 270], [0, 90], [0, 270] ]
+    ],
+    "letters:Q": [
+      [ [180, 90], [270, 90], [270, 90], [270, 180] ],
+      [ [0, 180], [180, 90], [270, 180], [0, 180] ],
+      [ [0, 180], [180, 0], [0, 180], [0, 180] ],
+      [ [0, 180], [180, 0], [0, 180], [180, 0] ],
+      [ [0, 180], [0, 90], [135, 270], [0, 270] ],
+      [ [0, 90], [270, 90], [270, 0], [315, 135] ]
+    ],
+    "letters:X": [
+      [ [135, 180], [null, null], [null, null], [225, 180] ],
+      [ [0, 135], [135, 315], [45, 225], [0, 225] ],
+      [ [null, null], [315, 180], [45, 180], [null, null] ],
+      [ [null, null], [0, 225], [0, 135], [null, null] ],
+      [ [45, 180], [225, 45], [315, 135], [180, 315] ],
+      [ [0, 45], [null, null], [null, null], [315, 0] ]
+    ],
+    "letters:Z": [
+      [ [90, 180], [270, 90], [270, 90], [270, 180] ],
+      [ [90, 0], [270, 90], [225, 270], [0, 225] ],
+      [ [null, null], [45, 225], [45, 225], [null, null] ],
+      [ [45, 180], [45, 90], [90, 270], [270, 180] ],
+      [ [0, 90], [90, 270], [270, 90], [270, 0] ],
+      [ [null, null], [null, null], [null, null], [null, null] ]
+    ],
+    "letters:A": [
+      [ [90, 180], [90, 270], [90, 270], [180, 270] ],
+      [ [0, 180], [90, 180], [180, 270], [0, 180] ],
+      [ [0, 180], [0, 90], [0, 270], [0, 180] ],
+      [ [0, 180], [90, 180], [270, 180], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 90], [0, 270], [0, 90], [0, 270] ]
+    ],
+    "letters:B": [
+      [ [90, 180], [90, 270], [90, 270], [180, 270] ],
+      [ [0, 180], [90, 180], [180, 270], [0, 180] ],
+      [ [0, 180], [0, 90], [0, 270], [0, 225] ],
+      [ [0, 180], [90, 180], [180, 270], [315, 180] ],
+      [ [0, 180], [0, 90], [0, 270], [0, 180] ],
+      [ [0, 90], [90, 270], [90, 270], [0, 270] ]
+    ],
+    "letters:G": [
+      [ [90, 180], [90, 270], [90, 270], [180, 270] ],
+      [ [0, 180], [90, 180], [90, 270], [0, 270] ],
+      [ [0, 180], [0, 180], [null, null], [null, null] ],
+      [ [0, 180], [0, 180], [90, 180], [180, 270] ],
+      [ [0, 180], [0, 90], [0, 270], [0, 180] ],
+      [ [0, 90], [90, 270], [90, 270], [0, 270] ]
+    ],
+    "letters:K": [
+      [ [90, 180], [180, 270], [90, 180], [180, 270] ],
+      [ [0, 180], [0, 180], [0, 225], [0, 180] ],
+      [ [0, 180], [0, 45], [null, null], [0, 225] ],
+      [ [0, 180], [90, 180], [180, 270], [315, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 90], [0, 270], [0, 90], [0, 270] ]
+    ],
+    "letters:N": [
+      [ [90, 180], [180, 270], [90, 180], [180, 270] ],
+      [ [0, 180], [0, 180], [0, 225], [0, 180] ],
+      [ [0, 180], [0, 45], [null, null], [0, 180] ],
+      [ [0, 180], [null, null], [180, 225], [0, 180] ],
+      [ [0, 180], [45, 180], [0, 180], [0, 180] ],
+      [ [0, 90], [0, 270], [0, 90], [0, 270] ]
+    ],
+    "letters:V": [
+      [ [90, 180], [270, 180], [180, 90], [270, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [0, 180], [0, 180], [0, 180], [0, 180] ],
+      [ [135, 0], [90, 0], [0, 270], [225, 0] ],
+      [ [null, null], [90, 315], [270, 45], [null, null] ]
+    ],
+    "letters:Y": [
+      [ [90, 180], [135, 270], [90, 225], [270, 180] ],
+      [ [0, 135], [null, null], [null, null], [0, 225] ],
+      [ [null, null], [315, 180], [45, 180], [null, null] ],
+      [ [null, null], [0, 180], [0, 180], [null, null] ],
+      [ [null, null], [0, 180], [180, 0], [null, null] ],
+      [ [null, null], [0, 90], [270, 0], [null, null] ]
+    ]
   };
-  function getClockStateForLetter(ch, rowInLetter, colInLetter) {
-    const glyph = letterPatterns[ch];
-    if (!glyph) return clockStates[12];
-    return clockStates[glyph[rowInLetter][colInLetter]];
+
+  const currentDefaults = {
+    "2x3": [
+      [ [ 5, 8 ], [ 2, 2 ], [ 1, 3 ] ],
+      [ [ 12, 7 ], [ 12, 2 ], [ 12, 0 ] ],
+      [ [ 4, 8 ], [ 5, 3 ], [ 1, 9 ] ],
+      [ [ 4, 8 ], [ 4, 3 ], [ 4, 3 ] ],
+      [ [ 7, 7 ], [ 1, 8 ], [ 12, 0 ] ],
+      [ [ 5, 9 ], [ 1, 8 ], [ 4, 3 ] ],
+      [ [ 5, 9 ], [ 2, 8 ], [ 1, 3 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 12, 2 ] ],
+      [ [ 5, 8 ], [ 5, 3 ], [ 1, 3 ] ],
+      [ [ 5, 8 ], [ 1, 2 ], [ 4, 3 ] ]
+    ],
+    "2x4": [
+      [ [ 5, 8 ], [ 2, 2 ], [ 2, 2 ], [ 1, 3 ] ],
+      [ [ 12, 7 ], [ 12, 2 ], [ 12, 2 ], [ 12, 0 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 5, 3 ], [ 1, 9 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 4, 3 ], [ 4, 3 ] ],
+      [ [ 7, 7 ], [ 2, 2 ], [ 1, 8 ], [ 12, 0 ] ],
+      [ [ 5, 9 ], [ 2, 12 ], [ 1, 8 ], [ 4, 3 ] ],
+      [ [ 5, 9 ], [ 2, 12 ], [ 2, 8 ], [ 1, 3 ] ],
+      [ [ 4, 8 ], [ 12, 10 ], [ 11, 12 ], [ 0, 12 ] ],
+      [ [ 5, 8 ], [ 2, 2 ], [ 1, 8 ], [ 1, 3 ] ],
+      [ [ 5, 8 ], [ 2, 2 ], [ 1, 2 ], [ 4, 3 ] ]
+    ],
+    "2x5": [
+      [ [ 5, 8 ], [ 2, 2 ], [ 2, 2 ], [ 2, 2 ], [ 1, 3 ] ],
+      [ [ 12, 7 ], [ 12, 2 ], [ 12, 2 ], [ 12, 2 ], [ 12, 0 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 5, 3 ], [ 2, 12 ], [ 1, 9 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 4, 3 ], [ 12, 2 ], [ 4, 3 ] ],
+      [ [ 7, 7 ], [ 2, 2 ], [ 1, 8 ], [ 12, 2 ], [ 12, 0 ] ],
+      [ [ 5, 9 ], [ 2, 12 ], [ 1, 8 ], [ 12, 2 ], [ 4, 3 ] ],
+      [ [ 5, 9 ], [ 2, 12 ], [ 2, 8 ], [ 2, 2 ], [ 1, 3 ] ],
+      [ [ 4, 8 ], [ 12, 2 ], [ 12, 10 ], [ 11, 12 ], [ 0, 12 ] ],
+      [ [ 5, 8 ], [ 2, 2 ], [ 1, 8 ], [ 2, 2 ], [ 1, 3 ] ],
+      [ [ 5, 8 ], [ 2, 2 ], [ 1, 2 ], [ 12, 2 ], [ 4, 3 ] ]
+    ],
+    "3x4": [
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 12, 7, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 0, 12 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 5, 6, 3 ], [ 1, 6, 9 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 4, 6, 3 ], [ 4, 6, 3 ] ],
+      [ [ 7, 12, 7 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 12, 12, 0 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 1, 6, 8 ], [ 4, 6, 3 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 2, 6, 8 ], [ 1, 6, 3 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 10 ], [ 12, 11, 12 ], [ 12, 2, 12 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 1, 6, 3 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 2 ], [ 4, 6, 3 ] ]
+    ],
+    "3x5": [
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 12, 7, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 0, 12 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 5, 6, 3 ], [ 2, 12, 12 ], [ 1, 6, 9 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 4, 6, 3 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ],
+      [ [ 7, 12, 7 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 12, 12, 2 ], [ 12, 12, 0 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 1, 6, 8 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 2, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 10 ], [ 12, 11, 12 ], [ 12, 2, 12 ], [ 12, 0, 12 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 2 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ]
+    ],
+    "3x6": [
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 12, 7, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 2, 12 ], [ 12, 0, 12 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 12, 12, 2 ], [ 5, 6, 3 ], [ 2, 12, 12 ], [ 1, 6, 9 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 12, 12, 2 ], [ 4, 6, 3 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ],
+      [ [ 7, 12, 7 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 12, 12, 2 ], [ 12, 12, 0 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 2, 12, 12 ], [ 1, 6, 8 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ],
+      [ [ 5, 6, 9 ], [ 2, 12, 12 ], [ 2, 12, 12 ], [ 2, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 4, 6, 8 ], [ 12, 12, 2 ], [ 12, 12, 10 ], [ 12, 11, 12 ], [ 12, 2, 12 ], [ 12, 0, 12 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 8 ], [ 2, 12, 2 ], [ 1, 6, 3 ] ],
+      [ [ 5, 6, 8 ], [ 2, 12, 2 ], [ 2, 12, 2 ], [ 1, 6, 2 ], [ 12, 12, 2 ], [ 4, 6, 3 ] ]
+    ],
+    letters: {
+      A: [ [ 5, 6, 6, 8 ], [ 2, 5, 8, 2 ], [ 2, 1, 3, 2 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 1, 3, 1, 3 ] ],
+      B: [ [ 5, 6, 6, 8 ], [ 2, 5, 8, 2 ], [ 2, 1, 3, 2 ], [ 2, 5, 8, 2 ], [ 2, 1, 3, 2 ], [ 1, 6, 6, 3 ] ],
+      C: [ [ 5, 6, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 2, 12, 12 ], [ 2, 2, 12, 12 ], [ 2, 1, 6, 8 ], [ 1, 6, 6, 3 ] ],
+      D: [ [ 5, 6, 6, 8 ], [ 2, 5, 12, 2 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 1, 12, 2 ], [ 1, 6, 6, 3 ] ],
+      E: [ [ 5, 6, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 1, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 1, 6, 8 ], [ 1, 6, 6, 3 ] ],
+      F: [ [ 5, 6, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 1, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 2, 12, 12 ], [ 1, 3, 12, 12 ] ],
+      G: [ [ 5, 6, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 2, 12, 12 ], [ 2, 2, 5, 8 ], [ 2, 1, 6, 2 ], [ 1, 6, 6, 3 ] ],
+      H: [ [ 5, 8, 5, 8 ], [ 2, 2, 2, 2 ], [ 2, 1, 3, 2 ], [ 2, 5, 8, 2 ], [ 2, 2, 2, 2 ], [ 1, 3, 1, 3 ] ],
+      I: [ [ 5, 6, 6, 8 ], [ 1, 8, 5, 3 ], [ 12, 2, 2, 12 ], [ 12, 2, 2, 12 ], [ 5, 3, 1, 8 ], [ 1, 6, 6, 3 ] ],
+      J: [ [ 12, 12, 5, 8 ], [ 12, 12, 2, 2 ], [ 12, 12, 2, 2 ], [ 5, 8, 2, 2 ], [ 2, 1, 3, 2 ], [ 1, 6, 6, 3 ] ],
+      K: [ [ 5, 8, 5, 8 ], [ 2, 2, 10, 2 ], [ 2, 1, 12, 10 ], [ 2, 5, 8, 9 ], [ 2, 2, 2, 2 ], [ 1, 3, 1, 3 ] ],
+      L: [ [ 5, 8, 12, 12 ], [ 2, 2, 12, 12 ], [ 2, 2, 12, 12 ], [ 2, 2, 12, 12 ], [ 2, 1, 6, 8 ], [ 1, 6, 6, 3 ] ],
+      M: [ [ 5, 8, 5, 8 ], [ 2, 0, 10, 2 ], [ 2, 11, 7, 2 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 1, 3, 1, 3 ] ],
+      N: [ [ 5, 8, 5, 8 ], [ 2, 2, 10, 2 ], [ 2, 0, 12, 2 ], [ 2, 12, 7, 2 ], [ 2, 11, 2, 2 ], [ 1, 3, 1, 3 ] ],
+      O: [ [ 5, 6, 6, 8 ], [ 2, 5, 8, 2 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 1, 3, 2 ], [ 1, 6, 6, 3 ] ],
+      P: [ [ 5, 6, 6, 8 ], [ 2, 5, 8, 2 ], [ 2, 1, 3, 2 ], [ 2, 5, 6, 3 ], [ 2, 2, 12, 12 ], [ 1, 3, 12, 12 ] ],
+      Q: [ [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ] ],
+      R: [ [ 5, 6, 6, 8 ], [ 2, 4, 9, 2 ], [ 2, 5, 6, 3 ], [ 2, 1, 6, 8 ], [ 2, 5, 8, 2 ], [ 1, 3, 1, 3 ] ],
+      S: [ [ 5, 6, 6, 8 ], [ 2, 5, 6, 3 ], [ 2, 1, 6, 8 ], [ 1, 6, 8, 2 ], [ 5, 6, 3, 2 ], [ 1, 6, 6, 3 ] ],
+      T: [ [ 5, 6, 6, 8 ], [ 1, 8, 5, 3 ], [ 12, 2, 2, 12 ], [ 12, 2, 2, 12 ], [ 12, 2, 2, 12 ], [ 12, 1, 3, 12 ] ],
+      U: [ [ 5, 8, 5, 8 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 1, 3, 2 ], [ 1, 6, 6, 3 ] ],
+      V: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 6, 12, 12 ] ],
+      W: [ [ 5, 8, 5, 8 ], [ 2, 2, 2, 2 ], [ 2, 2, 2, 2 ], [ 2, 0, 0, 2 ], [ 2, 11, 10, 2 ], [ 1, 6, 6, 3 ] ],
+      X: [ [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ] ],
+      Y: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
+      Z: [ [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ], [ 12, 12, 12, 12 ] ]
+    }
+  };
+
+  const stateHands = clockStates.map(s => [ s.a, s.b ]);
+  stateHands[12] = [ 225, 225 ];
+  function glyphFromStates(rows) {
+    return rows.map(row => row.map(idx => stateHands[idx]));
+  }
+  const PROJECT_DIGITS_3X6 =[ [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 2, 2 ], [ 2, 2, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 12, 5, 8 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 8, 8 ], [ 2, 2, 2 ], [ 2, 1, 2 ], [ 1, 8, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 12, 10, 10 ], [ 11, 11, 12 ], [ 2, 2, 12 ], [ 1, 3, 12 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ] ];
+
+  const DIGIT_GLYPHS = {};
+  const LETTER_GLYPHS = {};
+  for (const [ setId, digits ] of Object.entries(currentDefaults)) {
+    if (setId === "letters") continue;
+    DIGIT_GLYPHS[setId] = digits.map(glyphFromStates);
+  }
+  DIGIT_GLYPHS["3x6"] = PROJECT_DIGITS_3X6.map(glyphFromStates);
+  for (const [ ch, rows ] of Object.entries(currentDefaults.letters)) {
+    LETTER_GLYPHS[ch] = glyphFromStates(rows);
+  }
+  for (const [ key, grid ] of Object.entries(handEdits)) {
+    const sep = key.indexOf(":");
+    const setId = key.slice(0, sep);
+    const glyphId = key.slice(sep + 1);
+    if (setId === "letters") {
+      LETTER_GLYPHS[glyphId] = grid;
+    } else if (DIGIT_GLYPHS[setId]) {
+      DIGIT_GLYPHS[setId][parseInt(glyphId, 10)] = grid;
+    }
   }
   const LETTER_W = 4;
   const LETTER_H = 6;
-  const DIGIT_W = 3;
-  const DIGIT_H = 6;
+  function glyphSets() {
+    return [ {
+      id: "3x6",
+      w: 3,
+      h: 6,
+      digits: DIGIT_GLYPHS["3x6"]
+    }, {
+      id: "3x5",
+      w: 3,
+      h: 5,
+      digits: DIGIT_GLYPHS["3x5"]
+    }, {
+      id: "3x4",
+      w: 3,
+      h: 4,
+      digits: DIGIT_GLYPHS["3x4"]
+    }, {
+      id: "2x5",
+      w: 2,
+      h: 5,
+      digits: DIGIT_GLYPHS["2x5"]
+    }, {
+      id: "2x4",
+      w: 2,
+      h: 4,
+      digits: DIGIT_GLYPHS["2x4"]
+    }, {
+      id: "2x3",
+      w: 2,
+      h: 3,
+      digits: DIGIT_GLYPHS["2x3"]
+    } ];
+  }
+
+  const LETTER_GLYPH_W = LETTER_W;
+  const LETTER_GLYPH_H = LETTER_H;
+  const DAY_ABBR = [ "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" ];
+  const DATE_GLYPH_CANDIDATES = [
+    { id: "3x6", w: 3, h: 6 },
+    { id: "3x5", w: 3, h: 5 },
+    { id: "3x4", w: 3, h: 4 },
+    { id: "2x5", w: 2, h: 5 },
+    { id: "2x4", w: 2, h: 4 },
+    { id: "2x3", w: 2, h: 3 }
+  ];
+
+  let scrollOffset = 0;
+  let scrollLetters = [];
+  let lastAppliedPattern = -1;
+  function ensureScrollLetters(n) {
+    while (scrollLetters.length < n) {
+      const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      scrollLetters.push(...a);
+    }
+  }
+
+  function rankBetter(a, b) {
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return a[i] > b[i];
+    }
+    return false;
+  }
+  function searchTimeLayout(cols, rows, noColon) {
+    const formats = [ {
+      id: "hms",
+      digits: 6,
+      colons: 2,
+      fields: 3
+    }, {
+      id: "hm",
+      digits: 4,
+      colons: 1,
+      fields: 2
+    }, {
+      id: "hmsPlain",
+      digits: 6,
+      colons: 0,
+      fields: 3
+    }, {
+      id: "hmPlain",
+      digits: 4,
+      colons: 0,
+      fields: 2
+    } ];
+    let best = null;
+    let bestRank = null;
+    for (const g of glyphSets()) {
+      if (rows < g.h) continue;
+      for (const fmt of formats) {
+        for (const colonW of [ 2, 1 ]) {
+          if (fmt.colons === 0 && colonW !== 1) continue;
+          const cw = fmt.colons === 0 ? 0 : colonW;
+          if (noColon && cw > 0) continue;
+          if (cw === 2 && g.h < 5) continue;
+          for (const gap of [ 1, 0 ]) {
+            if (gap && g.w >= 3) continue;
+            const pairGaps = fmt.digits / 2 * gap;
+            const blockW = fmt.digits * g.w + fmt.colons * cw + pairGaps;
+            if (blockW > cols || g.h > rows) continue;
+            const rank = [ cw > 0 ? 1 : 0, g.w, fmt.fields, cw, g.h, gap ];
+            if (!best || rankBetter(rank, bestRank)) {
+              bestRank = rank;
+              best = {
+                glyph: g,
+                format: fmt.id,
+                fields: fmt.fields,
+                colonW: cw,
+                gap: gap,
+                blockW: blockW,
+                blockH: g.h,
+                digits: fmt.digits,
+                colons: fmt.colons
+              };
+            }
+          }
+        }
+      }
+    }
+    return best;
+  }
+  function chooseTimeLayout(cols, rows) {
+    const best = searchTimeLayout(cols, rows, false);
+    if (best && best.colonW > 0 && best.blockW > cols - 2) {
+      const plain = searchTimeLayout(cols, rows, true);
+      if (plain) return plain;
+    }
+    return best;
+  }
+  function colonRows(height, width) {
+    const pat = [];
+    for (let r = 0; r < height; r++) {
+      const row = [];
+      for (let c = 0; c < width; c++) row.push(12);
+      pat.push(row);
+    }
+    if (width >= 2 && height >= 5) {
+      let dots;
+      if (height === 5) dots = [ [ 0, 1 ], [ 3, 4 ] ];
+      else if (height === 6) dots = [ [ 1, 2 ], [ 3, 4 ] ];
+      else {
+        const top = Math.floor((height - 5) / 2);
+        dots = [ [ top, top + 1 ], [ top + 3, top + 4 ] ];
+      }
+      for (const pair of dots) {
+        pat[pair[0]][0] = 5;
+        pat[pair[0]][1] = 8;
+        pat[pair[1]][0] = 1;
+        pat[pair[1]][1] = 3;
+      }
+      return pat;
+    }
+    let marks;
+    if (height >= 6) {
+      const top = Math.floor((height - 6) / 2);
+      marks = [ top + 1, top + 4 ];
+    } else if (height === 5) {
+      marks = [ 1, 3 ];
+    } else if (height === 4) {
+      marks = [ 0, 2 ];
+    } else {
+      marks = [ 0, Math.min(2, height - 1) ];
+    }
+    for (const r of marks) {
+      if (r >= 0 && r < height) pat[r][0] = 2;
+    }
+    return pat;
+  }
   function createTimePattern(date) {
     const pattern = new Array(Cols * Rows);
+    for (let i = 0; i < pattern.length; i++) pattern[i] = stateHands[12];
+    const layout = chooseTimeLayout(Cols, Rows);
+    currentTimeLayout = layout;
+    if (!layout) return pattern;
+
+    const dayStr = DAY_ABBR[date.getDay()];
+    const dateStr = String(date.getDate()).padStart(2, "0");
+    const dayBlockW = 3 * LETTER_GLYPH_W + 2 * 1;
+    const sepW = 2;
+    let dateGlyph = null;
+    for (const c of DATE_GLYPH_CANDIDATES) {
+      const dateW = 2 * c.w + 1;
+      if (dayBlockW + sepW + dateW <= Cols) {
+        dateGlyph = { w: c.w, h: c.h, dateW: dateW, digits: DIGIT_GLYPHS[c.id] };
+        break;
+      }
+    }
+    const ddBlockH = LETTER_GLYPH_H;
+    const gapRows = 1;
+    const ddBlockW = dateGlyph ? dayBlockW + sepW + dateGlyph.dateW : 0;
+    const totalH = layout.blockH + gapRows + ddBlockH;
+    const hasDayDate = dateGlyph && totalH <= Rows;
+
+    let timeRow0;
+    if (hasDayDate) {
+      timeRow0 = Math.floor((Rows - totalH) / 2);
+    } else {
+      timeRow0 = Math.floor((Rows - layout.blockH) / 2);
+    }
+    const col0 = Math.floor((Cols - layout.blockW) / 2);
+    layout.col0 = col0;
+    layout.row0 = timeRow0;
+
     let hours = date.getHours();
     if (!is24Hour) {
       hours = hours % 12;
@@ -615,103 +1019,154 @@
     }
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    const COLON_W = 2;
-    const TOP_ROW = Math.floor((Rows - DIGIT_H) / 2);
-    const TOP_COL = 3;
-    const timeSlots = [ {
-      text: String(Math.floor(hours / 10)),
-      col0: TOP_COL + 0 * DIGIT_W
-    }, {
-      text: String(hours % 10),
-      col0: TOP_COL + 1 * DIGIT_W
-    }, {
-      text: ":",
-      col0: TOP_COL + 2 * DIGIT_W,
-      isColon: true
-    }, {
-      text: String(Math.floor(minutes / 10)),
-      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 0 * DIGIT_W
-    }, {
-      text: String(minutes % 10),
-      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 1 * DIGIT_W
-    }, {
-      text: ":",
-      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W,
-      isColon: true
-    }, {
-      text: String(Math.floor(seconds / 10)),
-      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W + COLON_W + 0 * DIGIT_W
-    }, {
-      text: String(seconds % 10),
-      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W + COLON_W + 1 * DIGIT_W
-    } ];
-    for (let i = 0; i < pattern.length; i++) pattern[i] = clockStates[12];
-    function drawGlyph(slot) {
-      const str = slot.text;
-      if (slot.isColon) {
-        for (let r = 0; r < DIGIT_H; r++) {
-          for (let c = 0; c < COLON_W; c++) {
-            const rr = (slot.row0 || TOP_ROW) + r;
-            const cc = slot.col0 + c;
-            if (rr >= Rows || cc >= Cols) continue;
-            const idx = rr * Cols + cc;
-            if (r === 1 || r === 3) pattern[idx] = clockStates[5]; else if (r === 2 || r === 4) pattern[idx] = clockStates[1]; else pattern[idx] = clockStates[12];
-          }
-        }
-        return;
-      }
-      const glyphW = slot.glyphW || DIGIT_W;
-      const glyphH = slot.isLetter ? LETTER_H : DIGIT_H;
-      const row0 = slot.row0 || TOP_ROW;
-      for (let k = 0; k < str.length; k++) {
-        const ch = str[k];
-        const charCol0 = slot.col0 + k * glyphW;
-        for (let r = 0; r < glyphH; r++) {
-          for (let c = 0; c < glyphW; c++) {
-            const rr = row0 + r;
-            const cc = charCol0 + c;
-            if (rr >= Rows || cc >= Cols) continue;
-            const idx = rr * Cols + cc;
-            if (/[0-9]/.test(ch)) {
-              pattern[idx] = getClockStateForNumber(parseInt(ch, 10), r, c);
-            } else if (/[A-Z]/.test(ch)) {
-              pattern[idx] = getClockStateForLetter(ch, r, c);
-            }
-          }
+    const parts = [ Math.floor(hours / 10), hours % 10, Math.floor(minutes / 10), minutes % 10 ];
+    if (layout.fields >= 3) {
+      parts.push(Math.floor(seconds / 10), seconds % 10);
+    }
+    const g = layout.glyph;
+    const colon = layout.colonW ? colonRows(g.h, layout.colonW).map(row => row.map(i => stateHands[i])) : null;
+    const groups = [];
+    for (let i = 0; i < parts.length; i += 2) groups.push([ parts[i], parts[i + 1] ]);
+    function stamp(glyph, r0, c0) {
+      for (let r = 0; r < glyph.length; r++) {
+        for (let c = 0; c < glyph[0].length; c++) {
+          const rr = r0 + r;
+          const cc = c0 + c;
+          if (rr < 0 || cc < 0 || rr >= Rows || cc >= Cols) continue;
+          pattern[rr * Cols + cc] = glyph[r][c];
         }
       }
     }
-    for (const slot of timeSlots) drawGlyph(slot);
+    let x = 0;
+    for (let gi = 0; gi < groups.length; gi++) {
+      if (gi && colon) {
+        stamp(colon, timeRow0, col0 + x);
+        x += layout.colonW;
+      }
+      const group = groups[gi];
+      for (let di = 0; di < group.length; di++) {
+        if (di && layout.gap) x += 1;
+        stamp(g.digits[group[di]], timeRow0, col0 + x);
+        x += g.w;
+      }
+    }
+    if (hasDayDate) {
+      const ddRow0 = timeRow0 + layout.blockH + gapRows;
+      const ddCol0 = Math.floor((Cols - ddBlockW) / 2);
+      for (let i = 0; i < 3; i++) {
+        const ch = dayStr[i];
+        const glyph = LETTER_GLYPHS[ch];
+        if (!glyph) continue;
+        stamp(glyph, ddRow0, ddCol0 + i * (LETTER_GLYPH_W + 1));
+      }
+      const dateCol = ddCol0 + dayBlockW + sepW;
+      const digitOffsetY = Math.floor((ddBlockH - dateGlyph.h) / 2);
+      for (let i = 0; i < 2; i++) {
+        const d = parseInt(dateStr[i], 10);
+        const glyph = dateGlyph.digits[d];
+        if (!glyph) continue;
+        stamp(glyph, ddRow0 + digitOffsetY, dateCol + i * (dateGlyph.w + 1));
+      }
+    }
     return pattern;
   }
+  function createScrollPattern() {
+    const pattern = new Array(Cols * Rows);
+    for (let i = 0; i < pattern.length; i++) pattern[i] = stateHands[12];
+    const blockH = LETTER_GLYPH_H;
+    if (Rows < blockH) return pattern;
+    const row0 = Math.floor((Rows - blockH) / 2);
+    const slotW = LETTER_GLYPH_W + 1;
+    const needed = Math.ceil((scrollOffset + Cols) / slotW) + 2;
+    ensureScrollLetters(needed);
+    for (let r = 0; r < blockH; r++) {
+      for (let col = 0; col < Cols; col++) {
+        const virtualCol = col + scrollOffset;
+        const slotIdx = Math.floor(virtualCol / slotW);
+        let slotCol = virtualCol - slotIdx * slotW;
+        if (slotCol < 0) slotCol += slotW;
+        if (slotCol >= LETTER_GLYPH_W) continue;
+        const ch = scrollLetters[slotIdx];
+        if (!ch) continue;
+        const glyph = LETTER_GLYPHS[ch];
+        if (!glyph) continue;
+        pattern[(row0 + r) * Cols + col] = glyph[r][slotCol];
+      }
+    }
+    return pattern;
+  }
+  const REST_ANGLE = 225;
   class Clock {
     constructor() {
-      this.angleA = 0;
-      this.angleB = 0;
+      this.angleA = REST_ANGLE;
+      this.angleB = REST_ANGLE;
       this.animA = null;
       this.animB = null;
-      this.rippleAnim = null;
+      this.alphaA = 0;
+      this.alphaB = 0;
+      this.fadeA = null;
+      this.fadeB = null;
     }
-    setTargets(targetA, targetB, durationSeconds, nowSec) {
-      if (durationSeconds <= 0) {
-        this.angleA = normalizeDeg(targetA);
-        this.angleB = normalizeDeg(targetB);
-        this.animA = null;
-        this.animB = null;
+    setHand(axis, target, durationSeconds, nowSec) {
+      const angleKey = "angle" + axis;
+      const animKey = "anim" + axis;
+      const alphaKey = "alpha" + axis;
+      const fadeKey = "fade" + axis;
+      if (target === null) {
+        this[animKey] = null;
+        if (durationSeconds <= 0) {
+          this[alphaKey] = 0;
+          this[fadeKey] = null;
+        } else if (this[alphaKey] > 0) {
+          this[fadeKey] = {
+            from: this[alphaKey],
+            to: 0,
+            startSec: nowSec,
+            endSec: nowSec + durationSeconds
+          };
+        }
         return;
       }
-      this.animA = {
-        startDeg: this.angleA,
-        targetDeg: normalizeDeg(targetA),
+      if (this[alphaKey] <= 0) this[angleKey] = REST_ANGLE;
+      if (durationSeconds <= 0) {
+        this[angleKey] = normalizeDeg(target);
+        this[animKey] = null;
+        this[alphaKey] = 1;
+        this[fadeKey] = null;
+        return;
+      }
+      if (this[alphaKey] < 1) {
+        this[fadeKey] = {
+          from: this[alphaKey],
+          to: 1,
+          startSec: nowSec,
+          endSec: nowSec + durationSeconds
+        };
+      }
+      this[animKey] = {
+        startDeg: this[angleKey],
+        targetDeg: normalizeDeg(target),
         startSec: nowSec,
         endSec: nowSec + durationSeconds
       };
-      this.animB = {
-        startDeg: this.angleB,
-        targetDeg: normalizeDeg(targetB),
-        startSec: nowSec,
-        endSec: nowSec + durationSeconds
-      };
+    }
+    setTargets(targetA, targetB, durationSeconds, nowSec) {
+      this.setHand("A", targetA, durationSeconds, nowSec);
+      this.setHand("B", targetB, durationSeconds, nowSec);
+    }
+    updateFade(axis, nowSec) {
+      const alphaKey = "alpha" + axis;
+      const fadeKey = "fade" + axis;
+      const f = this[fadeKey];
+      if (!f) return;
+      const denom = f.endSec - f.startSec;
+      let t = denom <= 1e-9 ? 1 : (nowSec - f.startSec) / denom;
+      t = clamp(t, 0, 1);
+      this[alphaKey] = f.from + (f.to - f.from) * smoothStep(t);
+      if (t >= 1) {
+        this[alphaKey] = f.to;
+        this[fadeKey] = null;
+      }
     }
     update(nowSec) {
       if (this.animA) {
@@ -728,39 +1183,16 @@
         this.angleB = interpAngleDeg(this.animB.startDeg, this.animB.targetDeg, t);
         if (t >= 1) this.animB = null;
       }
+      this.updateFade("A", nowSec);
+      this.updateFade("B", nowSec);
     }
   }
   const clocks = [];
   function createClocks() {
+    const previous = clocks.slice();
     clocks.length = 0;
-    for (let i = 0; i < Cols * Rows; i++) clocks.push(new Clock);
-  }
-  function getPatternAngles(row, col, rows, cols, quantize = false) {
-    const cx = (cols - 1) * .5;
-    const cy = (rows - 1) * .5;
-    let dx = col - cx;
-    let dy = row - cy;
-    const aspect = rows / cols;
-    dx *= aspect;
-    const maxDx = cx * aspect;
-    const maxDy = cy;
-    const maxR = Math.sqrt(maxDx * maxDx + maxDy * maxDy);
-    const r = Math.sqrt(dx * dx + dy * dy);
-    const rn = maxR <= 1e-6 ? 0 : r / maxR;
-    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-    radialDeg = normalizeDeg(radialDeg + 90);
-    const tangentDeg = normalizeDeg(radialDeg + 90);
-    const spreadCenter = 55;
-    const spreadOuter = 10;
-    const spread = lerp(spreadCenter, spreadOuter, smoothStep(rn));
-    let a = normalizeDeg(tangentDeg - spread);
-    let b = normalizeDeg(tangentDeg + spread);
-    if (quantize) {
-      const step = 15;
-      a = normalizeDeg(Math.round(a / step) * step);
-      b = normalizeDeg(Math.round(b / step) * step);
-    }
-    return [ a, b ];
+    const count = Cols * Rows;
+    for (let i = 0; i < count; i++) clocks.push(previous[i] || new Clock);
   }
   function getPatternAnglesCircleOpen(row, col, rows, cols, cxRatio = .5, cyRatio = .5, spreadCenter = 20) {
     const cx = (cols - 1) * cxRatio;
@@ -783,17 +1215,6 @@
     return [ a, b ];
   }
   function getPatternVector(row, col, rows, cols, cxRatio = .5, cyRatio = .5) {
-    const cx = (cols - 1) * cxRatio;
-    const cy = (rows - 1) * cyRatio;
-    const dx = col - cx;
-    const dy = row - cy;
-    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-    radialDeg = normalizeDeg(radialDeg + 90);
-    const a = normalizeDeg(radialDeg);
-    const b = normalizeDeg(radialDeg + 180);
-    return [ a, b ];
-  }
-  function getPatternVectorTangent(row, col, rows, cols, cxRatio = .5, cyRatio = .5) {
     const cx = (cols - 1) * cxRatio;
     const cy = (rows - 1) * cyRatio;
     const dx = col - cx;
@@ -1002,9 +1423,23 @@
       return this.degreesFromVectorUp0CW(dsx, dsy);
     }
   }
-  let currentTimePattern = new Array(Cols * Rows).fill(clockStates[12]);
+  let currentTimeLayout = null;
   let nextPatternSwitchSec = 0;
-  function applyPattern(pIndex, nowSec) {
+  function applyPattern(pIndex, nowSec, durationSec) {
+    const moveSeconds = durationSec == null ? TransitionSeconds : durationSec;
+    if (pIndex === 20 && lastAppliedPattern !== 20) {
+      scrollOffset = 0;
+    }
+    lastAppliedPattern = pIndex;
+
+    let timePattern = null;
+    let scrollPattern = null;
+    if (pIndex === 4) {
+      timePattern = createTimePattern(new Date);
+    } else if (pIndex === 20) {
+      scrollPattern = createScrollPattern();
+    }
+
     let idx = 0;
     for (let row = 0; row < Rows; row++) {
       for (let col = 0; col < Cols; col++) {
@@ -1022,10 +1457,9 @@
           [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, .5, .5, 110);
           PatternPeriodSeconds = TransitionSeconds;
         } else if (pIndex === 4) {
-          currentTimePattern = createTimePattern(new Date);
-          const st = currentTimePattern[idx];
-          aDeg = st.a;
-          bDeg = st.b;
+          const st = timePattern[idx];
+          aDeg = st[0];
+          bDeg = st[1];
           PatternPeriodSeconds = TransitionSeconds + 5;
         } else if (pIndex === 5) {
           const cfg = {
@@ -1086,109 +1520,135 @@
           bDeg = normalizeDeg(aDeg + 180);
           PatternPeriodSeconds = TransitionSeconds;
         } else if (pIndex === 8) {
-          const layer = Math.min(row, col, Rows - 1 - row, Cols - 1 - col);
-          const isTopLeft = row === layer && col === layer;
-          const isTopRight = row === layer && col === Cols - 1 - layer;
-          const isBottomLeft = row === Rows - 1 - layer && col === layer;
-          const isBottomRight = row === Rows - 1 - layer && col === Cols - 1 - layer;
-          if (isTopLeft) {
-            aDeg = 90;
-            bDeg = 180;
-          } else if (isTopRight) {
-            aDeg = 180;
-            bDeg = 270;
-          } else if (isBottomLeft) {
-            aDeg = 0;
-            bDeg = 90;
-          } else if (isBottomRight) {
-            aDeg = 0;
-            bDeg = 270;
-          } else if (row === layer || row === Rows - 1 - layer) {
+          const oddRows = Rows % 2 === 1;
+          const gridH = oddRows ? Rows - 1 : Rows;
+          if (oddRows && row === Rows - 1) {
             aDeg = 90;
             bDeg = 270;
-          } else if (col === layer || col === Cols - 1 - layer) {
-            aDeg = 0;
-            bDeg = 180;
           } else {
-            aDeg = 0;
-            bDeg = 90;
+            const layer = Math.min(row, col, gridH - 1 - row, Cols - 1 - col);
+            const isTopLeft = row === layer && col === layer;
+            const isTopRight = row === layer && col === Cols - 1 - layer;
+            const isBottomLeft = row === gridH - 1 - layer && col === layer;
+            const isBottomRight = row === gridH - 1 - layer && col === Cols - 1 - layer;
+            if (isTopLeft) {
+              aDeg = 90;
+              bDeg = 180;
+            } else if (isTopRight) {
+              aDeg = 180;
+              bDeg = 270;
+            } else if (isBottomLeft) {
+              aDeg = 0;
+              bDeg = 90;
+            } else if (isBottomRight) {
+              aDeg = 0;
+              bDeg = 270;
+            } else if (row === layer || row === gridH - 1 - layer) {
+              aDeg = 90;
+              bDeg = 270;
+            } else if (col === layer || col === Cols - 1 - layer) {
+              aDeg = 0;
+              bDeg = 180;
+            } else {
+              aDeg = 0;
+              bDeg = 90;
+            }
           }
           PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         } else if (pIndex === 9) {
-          const halfRows = Rows / 2;
+          const oddRows = Rows % 2 === 1;
+          const gridH = oddRows ? Rows - 1 : Rows;
+          const halfRows = gridH / 2;
           const halfCols = Cols / 2;
-          const qRow = Math.floor(row / halfRows);
-          const qCol = Math.floor(col / halfCols);
-          const lRow = row % halfRows;
-          const lCol = col % halfCols;
-          const onOuterTop = lRow === 0;
-          const onOuterBottom = lRow === halfRows - 1;
-          const onOuterLeft = lCol === 0;
-          const onOuterRight = lCol === halfCols - 1;
-          const innerMargin = 1;
-          const onInnerTop = lRow === innerMargin;
-          const onInnerBottom = lRow === halfRows - 1 - innerMargin;
-          const onInnerLeft = lCol === innerMargin;
-          const onInnerRight = lCol === halfCols - 1 - innerMargin;
-          const isOuterTopLeft = onOuterTop && onOuterLeft;
-          const isOuterTopRight = onOuterTop && onOuterRight;
-          const isOuterBottomLeft = onOuterBottom && onOuterLeft;
-          const isOuterBottomRight = onOuterBottom && onOuterRight;
-          const isInnerTopLeft = onInnerTop && onInnerLeft;
-          const isInnerTopRight = onInnerTop && onInnerRight;
-          const isInnerBottomLeft = onInnerBottom && onInnerLeft;
-          const isInnerBottomRight = onInnerBottom && onInnerRight;
-          function setCornerAngles(isTL, isTR, isBL, isBR) {
-            if (isTL) {
-              aDeg = 90;
-              bDeg = 180;
-            } else if (isTR) {
-              aDeg = 180;
-              bDeg = 270;
-            } else if (isBL) {
-              aDeg = 0;
-              bDeg = 90;
-            } else if (isBR) {
-              aDeg = 0;
-              bDeg = 270;
-            }
-          }
-          if (isOuterTopLeft || isOuterTopRight || isOuterBottomLeft || isOuterBottomRight) {
-            setCornerAngles(isOuterTopLeft, isOuterTopRight, isOuterBottomLeft, isOuterBottomRight);
-          } else if (onOuterTop || onOuterBottom) {
+          if ((oddRows && row === Rows - 1) || halfRows === 1) {
             aDeg = 90;
             bDeg = 270;
-          } else if (onOuterLeft || onOuterRight) {
-            aDeg = 0;
-            bDeg = 180;
-          } else if (isInnerTopLeft || isInnerTopRight || isInnerBottomLeft || isInnerBottomRight) {
-            setCornerAngles(isInnerTopLeft, isInnerTopRight, isInnerBottomLeft, isInnerBottomRight);
-          } else if (onInnerTop || onInnerBottom) {
-            aDeg = 90;
-            bDeg = 270;
-          } else if (onInnerLeft || onInnerRight) {
-            aDeg = 0;
-            bDeg = 180;
           } else {
-            aDeg = 0;
-            bDeg = 0;
+            const qRow = Math.floor(row / halfRows);
+            const qCol = Math.floor(col / halfCols);
+            const lRow = row % halfRows;
+            const lCol = col % halfCols;
+            const onOuterTop = lRow === 0;
+            const onOuterBottom = lRow === halfRows - 1;
+            const onOuterLeft = lCol === 0;
+            const onOuterRight = lCol === halfCols - 1;
+            const innerMargin = 1;
+            const onInnerTop = lRow === innerMargin;
+            const onInnerBottom = lRow === halfRows - 1 - innerMargin;
+            const onInnerLeft = lCol === innerMargin;
+            const onInnerRight = lCol === halfCols - 1 - innerMargin;
+            const isOuterTopLeft = onOuterTop && onOuterLeft;
+            const isOuterTopRight = onOuterTop && onOuterRight;
+            const isOuterBottomLeft = onOuterBottom && onOuterLeft;
+            const isOuterBottomRight = onOuterBottom && onOuterRight;
+            const isInnerTopLeft = onInnerTop && onInnerLeft;
+            const isInnerTopRight = onInnerTop && onInnerRight;
+            const isInnerBottomLeft = onInnerBottom && onInnerLeft;
+            const isInnerBottomRight = onInnerBottom && onInnerRight;
+            const setCornerAngles = (isTL, isTR, isBL, isBR) => {
+              if (isTL) {
+                aDeg = 90;
+                bDeg = 180;
+              } else if (isTR) {
+                aDeg = 180;
+                bDeg = 270;
+              } else if (isBL) {
+                aDeg = 0;
+                bDeg = 90;
+              } else if (isBR) {
+                aDeg = 0;
+                bDeg = 270;
+              }
+            };
+            if (isOuterTopLeft || isOuterTopRight || isOuterBottomLeft || isOuterBottomRight) {
+              setCornerAngles(isOuterTopLeft, isOuterTopRight, isOuterBottomLeft, isOuterBottomRight);
+            } else if (onOuterTop || onOuterBottom) {
+              aDeg = 90;
+              bDeg = 270;
+            } else if (onOuterLeft || onOuterRight) {
+              aDeg = 0;
+              bDeg = 180;
+            } else if (onInnerTop && onInnerBottom) {
+              aDeg = 90;
+              bDeg = 270;
+            } else if (onInnerLeft && onInnerRight) {
+              aDeg = 0;
+              bDeg = 180;
+            } else if (isInnerTopLeft || isInnerTopRight || isInnerBottomLeft || isInnerBottomRight) {
+              setCornerAngles(isInnerTopLeft, isInnerTopRight, isInnerBottomLeft, isInnerBottomRight);
+            } else if (onInnerTop || onInnerBottom) {
+              aDeg = 90;
+              bDeg = 270;
+            } else if (onInnerLeft || onInnerRight) {
+              aDeg = 0;
+              bDeg = 180;
+            } else {
+              aDeg = 0;
+              bDeg = 0;
+            }
           }
           PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         } else if (pIndex === 10) {
-          const localRow = row % 2;
-          const localCol = col % 2;
-          if (localRow === 0 && localCol === 0) {
+          const oddRows = Rows % 2 === 1;
+          if (oddRows && row === Rows - 1) {
             aDeg = 90;
-            bDeg = 180;
-          } else if (localRow === 0 && localCol === 1) {
-            aDeg = 180;
             bDeg = 270;
-          } else if (localRow === 1 && localCol === 0) {
-            aDeg = 0;
-            bDeg = 90;
-          } else if (localRow === 1 && localCol === 1) {
-            aDeg = 0;
-            bDeg = 270;
+          } else {
+            const localRow = row % 2;
+            const localCol = col % 2;
+            if (localRow === 0 && localCol === 0) {
+              aDeg = 90;
+              bDeg = 180;
+            } else if (localRow === 0 && localCol === 1) {
+              aDeg = 180;
+              bDeg = 270;
+            } else if (localRow === 1 && localCol === 0) {
+              aDeg = 0;
+              bDeg = 90;
+            } else {
+              aDeg = 0;
+              bDeg = 270;
+            }
           }
           PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         } else if (pIndex === 11) {
@@ -1216,7 +1676,14 @@
           [aDeg, bDeg] = getPatternPinwheel(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
         } else if (pIndex === 17) {
-          [aDeg, bDeg] = getPatternSquareRings(row, col, Rows, Cols);
+          const oddRows = Rows % 2 === 1;
+          const gridH = oddRows ? Rows - 1 : Rows;
+          if (oddRows && row === Rows - 1) {
+            aDeg = 90;
+            bDeg = 270;
+          } else {
+            [aDeg, bDeg] = getPatternSquareRings(row, col, gridH, Cols);
+          }
           PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         } else if (pIndex === 18) {
           [aDeg, bDeg] = getPatternBurst(row, col, Rows, Cols);
@@ -1224,11 +1691,16 @@
         } else if (pIndex === 19) {
           [aDeg, bDeg] = getPatternFigure8(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 20) {
+          const st = scrollPattern[idx];
+          aDeg = st[0];
+          bDeg = st[1];
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 10);
         } else if (pIndex === 21) {
           [aDeg, bDeg] = getPatternCrosshatch(row, col, Rows, Cols);
           PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         }
-        clocks[idx].setTargets(aDeg, bDeg, TransitionSeconds, nowSec);
+        clocks[idx].setTargets(aDeg, bDeg, moveSeconds, nowSec);
         idx++;
       }
     }
@@ -1247,29 +1719,23 @@
   function rgba(c) {
     return `rgba(${c.r},${c.g},${c.b},${c.a})`;
   }
-  function resize() {
+  function resize(force) {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const DOCK_W = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--dock-width")) || 40;
     const maxW = (window.innerWidth - DOCK_W) * .94;
     const maxH = window.innerHeight * .92;
     cellSize = Math.floor(Math.min(maxW / Cols, maxH / Rows));
-    pad = cellSize * .03;
-    const cssW = Math.floor(cellSize * Cols + pad);
-    const cssH = Math.floor(cellSize * Rows + pad);
+    pad = Math.max(1, cellSize * .03);
+    const cssW = Math.floor(cellSize * Cols + pad * 2);
+    const cssH = Math.floor(cellSize * Rows + pad * 2);
     canvas.style.width = cssW + "px";
     canvas.style.height = cssH + "px";
     const bufW = Math.floor(cssW * dpr);
     const bufH = Math.floor(cssH * dpr);
-    canvas.addEventListener("mousemove", e => {
-      const rect = canvas.getBoundingClientRect();
-      mouseCanvasX = e.clientX - rect.left;
-      mouseCanvasY = e.clientY - rect.top;
-    });
-    if (canvas.width === bufW && canvas.height === bufH) return;
+    if (!force && canvas.width === bufW && canvas.height === bufH) return;
     canvas.width = bufW;
     canvas.height = bufH;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    pad = cellSize * .03;
     const diameter = cellSize * .98;
     radius = diameter / 2;
     lenA = radius * .95;
@@ -1340,7 +1806,6 @@
     ctx.restore();
   }
   function draw(nowSec) {
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
     const w = canvas.width;
     const h = canvas.height;
     void nowSec;
@@ -1358,15 +1823,25 @@
         ctx.drawImage(clockFaceCanvas, pad + col * cellSize + offset, pad + row * cellSize + offset, radius * 2, radius * 2);
         const c = clocks[idx];
         const rippleOffset = computeRippleOffset(col, row, nowSec);
-        const angleA = normalizeDeg(c.angleA + rippleOffset);
-        const angleB = normalizeDeg(c.angleB + rippleOffset);
-        drawHand(cx, cy, angleB, lenB, thickB, shadowOffsetPx * .8, shadowBlurPx);
-        drawHand(cx, cy, angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
-        ctx.beginPath();
-        ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.fillStyle = rgba(handColor);
-        ctx.fill();
+        if (c.alphaA > 0 || c.alphaB > 0) {
+          const angleA = normalizeDeg(c.angleA + rippleOffset);
+          const angleB = normalizeDeg(c.angleB + rippleOffset);
+          if (c.alphaB > 0) {
+            ctx.globalAlpha = c.alphaB;
+            drawHand(cx, cy, angleB, lenB, thickB, shadowOffsetPx * .8, shadowBlurPx);
+          }
+          if (c.alphaA > 0) {
+            ctx.globalAlpha = c.alphaA;
+            drawHand(cx, cy, angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
+          }
+          ctx.globalAlpha = Math.max(c.alphaA, c.alphaB);
+          ctx.beginPath();
+          ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.fillStyle = rgba(handColor);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
         idx++;
       }
     }
@@ -1433,7 +1908,7 @@
     if (isAnimating) {
       for (const c of clocks) {
         c.update(nowSec);
-        if (c.animA || c.animB) anyMoving = true;
+        if (c.animA || c.animB || c.fadeA || c.fadeB) anyMoving = true;
       }
       isAnimating = anyMoving || mouseFollowActive;
     }
@@ -1443,6 +1918,7 @@
     draw(nowSec);
   }
   function setupControls() {
+    const hudEl = document.getElementById("hud");
     const settingsBtn = document.getElementById("settings-btn");
     const settingsModal = document.getElementById("settings-modal");
     const transitionSlider = document.getElementById("transition-slider");
@@ -1454,6 +1930,10 @@
     const patternNextBtn = document.getElementById("pattern-next-btn");
     const showTimeBtn = document.getElementById("show-time-btn");
     const fullscreenBtn = document.getElementById("fullscreen-btn");
+    const colsSlider = document.getElementById("cols-slider");
+    const rowsSlider = document.getElementById("rows-slider");
+    const colsValue = document.getElementById("cols-value");
+    const rowsValue = document.getElementById("rows-value");
     function colorsForTheme(name) {
       if (name === "light") {
         return {
@@ -1535,6 +2015,10 @@
     });
     settingsBtn.addEventListener("click", e => {
       e.stopPropagation();
+      if (hudEl.__suppressClick) {
+        hudEl.__suppressClick = false;
+        return;
+      }
       const isHidden = settingsModal.style.display === "none" || !settingsModal.style.display;
       settingsModal.style.display = isHidden ? "block" : "none";
     });
@@ -1584,9 +2068,111 @@
     } catch (e) {
       setTheme("dark");
     }
+    function syncGridUI() {
+      colsSlider.value = String(Cols);
+      rowsSlider.value = String(Rows);
+      colsValue.textContent = String(Cols);
+      rowsValue.textContent = String(Rows);
+      const layout = chooseTimeLayout(Cols, Rows);
+      currentTimeLayout = layout;
+      canvas.setAttribute("aria-label", Cols + " by " + Rows + " clock grid, time centered");
+    }
+    function setGridSize(cols, rows) {
+      cols = clamp(Math.round(cols), COLS_MIN, COLS_MAX);
+      rows = clamp(Math.round(rows), ROWS_MIN, ROWS_MAX);
+      const changed = cols !== Cols || rows !== Rows;
+      Cols = cols;
+      Rows = rows;
+      syncGridUI();
+      if (!changed) return;
+      createClocks();
+      resize(true);
+      const nowSec = performance.now() / 1e3;
+      applyPattern(patternIndex, nowSec);
+      nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
+      isAnimating = true;
+      try {
+        localStorage.setItem("clockGridCols", String(Cols));
+        localStorage.setItem("clockGridRows", String(Rows));
+      } catch (e) {}
+    }
+    colsSlider.addEventListener("input", () => setGridSize(parseInt(colsSlider.value, 10), Rows));
+    rowsSlider.addEventListener("input", () => setGridSize(Cols, parseInt(rowsSlider.value, 10)));
+    syncGridUI();
     isAnimating = true;
+
+    (function makeHudDraggable() {
+      const DRAG_THRESHOLD = 4;
+      let tracking = false;
+      let dragging = false;
+      let startX = 0, startY = 0;
+      let startLeft = 0, startTop = 0;
+
+      function begin(e) {
+        const r = hudEl.getBoundingClientRect();
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = r.left;
+        startTop = r.top;
+        tracking = true;
+        dragging = false;
+      }
+
+      function move(e) {
+        if (!tracking) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!dragging) {
+          if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+          dragging = true;
+          hudEl.classList.add("dragging");
+          hudEl.style.left = startLeft + "px";
+          hudEl.style.top  = startTop + "px";
+          hudEl.style.right = "auto";
+        }
+        hudEl.style.left = clamp(startLeft + dx, 4, window.innerWidth  - hudEl.offsetWidth  - 4) + "px";
+        hudEl.style.top  = clamp(startTop  + dy, 4, window.innerHeight - hudEl.offsetHeight - 4) + "px";
+      }
+
+      function end() {
+        if (!tracking) return;
+        const wasDragging = dragging;
+        tracking = false;
+        dragging = false;
+        if (wasDragging) {
+          hudEl.__suppressClick = true;
+          hudEl.classList.remove("dragging");
+          const r = hudEl.getBoundingClientRect();
+          const goLeft = (r.left + r.width / 2) < window.innerWidth / 2;
+          hudEl.style.left = "";
+          hudEl.style.right = "";
+          hudEl.style.top = "";
+          hudEl.classList.toggle("side-left",  goLeft);
+          hudEl.classList.toggle("side-right", !goLeft);
+          setTimeout(() => { hudEl.__suppressClick = false; }, 160);
+        }
+      }
+
+      hudEl.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        if (e.target.closest("button, input, label, a, details, summary, select, textarea")) return;
+        begin(e);
+      });
+      settingsBtn.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        begin(e);
+      });
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", end);
+      document.addEventListener("pointercancel", end);
+    })();
   }
-  window.addEventListener("resize", resize);
+  window.addEventListener("resize", () => resize());
+  canvas.addEventListener("mousemove", e => {
+    const rect = canvas.getBoundingClientRect();
+    mouseCanvasX = e.clientX - rect.left;
+    mouseCanvasY = e.clientY - rect.top;
+  });
   document.getElementById("clock-container").addEventListener("click", e => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -1626,18 +2212,32 @@
     if (patternIndex === 4) {
       const nowSec = performance.now() / 1e3;
       const d = new Date;
-      const sig = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+      const layout = currentTimeLayout || chooseTimeLayout(Cols, Rows);
+      const sig = layout && layout.fields >= 3 ? d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() : d.getHours() * 60 + d.getMinutes();
       if (sig !== _lastTimeSig) {
         _lastTimeSig = sig;
         const prevDur = TransitionSeconds;
         TransitionSeconds = .4;
         applyPattern(4, nowSec);
         TransitionSeconds = prevDur;
+        PatternPeriodSeconds = prevDur + 5;
         isAnimating = true;
       }
     }
   }, 250);
   let _lastTimeSig = -1;
+  const SCROLL_STEP_MS = 700;
+  setInterval(() => {
+    if (patternIndex === 20 && !mouseFollowActive) {
+      scrollOffset += 1;
+      const nowSec = performance.now() / 1e3;
+      const prevDur = TransitionSeconds;
+      TransitionSeconds = SCROLL_STEP_MS / 1000;
+      applyPattern(20, nowSec);
+      TransitionSeconds = prevDur;
+      isAnimating = true;
+    }
+  }, SCROLL_STEP_MS);
 })();
 </script>
 </body>
