@@ -34,7 +34,7 @@ A beautiful, interactive HTML-based clock displays with animated digit represent
 2. Clock displays in center of screen with white background
 3. Click settings icon to customize
 
-## ⚙️ Settings
+## Settings
 
 **Theme Colors**
 - 6 color theme options available
@@ -56,10 +56,10 @@ let shadowColor = { r: 200, g: 200, b: 200, a: 0.61 };
 
 ##  Browser Compatibility
 
-- Chrome/Chromium ✅
-- Firefox ✅
-- Safari ✅
-- Edge ✅
+- Chrome/Chromium
+- Firefox
+- Safari
+- Edge
 - Any modern browser with Canvas support
 
 ##  How It Works
@@ -79,7 +79,7 @@ The clock uses a 16x8 grid system to represent time digits:
 | `R` | Randomize Theme |
 | `Space` | Show Current Time |
 
-## 💡 Tips
+## Tips
 
 - Use full screen for best experience (F11)
 - Adjust transition speed based on preference
