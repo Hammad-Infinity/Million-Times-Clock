@@ -2,21 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23B07A2E'/%3E%3Cpath%20fill='%23FFFFFF'%20d='M10%208h7v5l-7%207zM10%2024l7-7v11h24V11.5a3.5%203.5%200%200%201%207%200V39l-7%207v-9H17v16.5a3.5%203.5%200%200%201-7%200zM41%2051h7v-7z'/%3E%3C/svg%3E" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>A Million Times Clock Art</title>
   <style>
   :root {
-    --top-panel-height: 40px;  
-    --dock-width: 40px;        
+    --dock-width: 40px;
+    --bg-app: #1f2225;        
+    --bg-panel: #2a2d31;      
+    --bg-canvas: #ffffff;     
+    --text: #e6e6e6;
+    --text-dim: #9aa0a8;
+    --border: #3a3d42;
+    --accent: #6ad1ff;
+    --accent-dim: #3a8fbf;
+    --shadow: rgba(0,0,0,0.45);
+  }
+  html.theme-light {
+    --bg-app: #ececec;
+    --bg-panel: #ffffff;
+    --bg-canvas: #ffffff;
+    --text: #202225;
+    --text-dim: #5a6068;
+    --border: #d6d8db;
+    --accent: #007aff;
+    --accent-dim: #4a98e0;
+    --shadow: rgba(0,0,0,0.18);
   }
   html, body {
     margin: 0;
     height: 100%;
     overflow: hidden;
-    background: #0a0a0a; 
+    background: var(--bg-app);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     user-select: none;
-   }
+    transition: background-color 0.4s ease;
+  }
     #clock-container {
       position: absolute;
       top: 50%;
@@ -25,8 +47,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #ffffff;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      background: var(--bg-canvas);
+      box-shadow: 0 8px 32px var(--shadow);
       padding: 2vmin;
       border-radius: 2vmin;
       transition: background-color 0.4s ease;
@@ -36,136 +58,142 @@
     }
     .controls {
       position: fixed;
-      top: calc(var(--top-panel-height));
-      right: 20px;
+      top: 16px;
+      right: 16px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       z-index: 999;
     }
     .controls button {
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
       cursor: pointer;
       padding: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
-      transition: background 0.2s;
+      width: 38px;
+      height: 38px;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      color: var(--text);
     }
     .controls button:hover {
-      background: white;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .controls button:active {
+      transform: scale(0.95);
     }
     .controls button svg {
-      width: 24px;
-      height: 24px;
-      fill: #333;
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
     }
 
+    .theme-pill {
+      display: flex;
+      gap: 0;
+      background: var(--bg-app);
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      width: fit-content;
+    }
+    .theme-pill button {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .theme-pill button.active {
+      background: var(--accent);
+      color: #0a0a0a;
+    }
+    .theme-pill button:not(.active):hover {
+      color: var(--text);
+    }
     #settings-modal {
       display: none;
       position: fixed;
-      top: 60px;
+      top: 64px;
       right: 10px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      padding: 14px;
+      box-shadow: 0 12px 32px var(--shadow);
       z-index: 1000;
-      width: 260px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      animation: modalFadeIn 0.2s ease;
+      width: 280px;
+      animation: modalFadeIn 0.18s ease;
+      cursor: grab;
+      transition: left 0.26s cubic-bezier(0.22, 0.61, 0.36, 1),
+                  top  0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    #settings-modal.dragging {
+      cursor: grabbing;
+      transition: none;
     }
     @keyframes modalFadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
+      from { opacity: 0; transform: translateY(-6px); }
       to { opacity: 1; transform: translateY(0); }
     }
     #settings-modal h3 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
     }
     #settings-modal .setting {
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    #settings-modal .setting > label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
     }
     #settings-modal label {
-      font-size: 14px;
-      color: #333;
+      font-size: 13px;
+      color: var(--text);
       margin-right: 10px;
     }
     #settings-modal input[type="range"] {
       -webkit-appearance: none;
+      appearance: none;
       width: 100%;
       height: 4px;
       border-radius: 2px;
-      background: var(--slider-track);
+      background: var(--border);
       outline: none;
-      opacity: 0.7;
       transition: opacity 0.2s;
     }
     #settings-modal input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
-      background: #007bff;
+      background: var(--accent);
       cursor: pointer;
-    }
-    #settings-modal input[type="range"]::-moz-range-track {
-      background: var(--slider-track);
-      height: 4px;
-      border-radius: 2px;
+      border: 2px solid var(--bg-panel);
     }
     #settings-modal input[type="range"]::-moz-range-thumb {
-      background: #007bff;
-      width: 16px;
-      height: 16px;
+      background: var(--accent);
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       cursor: pointer;
-    }
-    #settings-modal input[type="range"]:hover {
-      opacity: 1;
-    }
-    .color-swatches {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-    .swatch-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .color-swatch {
-      width: 100%;
-      height: 30px;
-      border: 2px solid transparent;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    .color-swatch.active {
-      border-color: #007aff;
-      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
-    }
-    .swatch-label {
-      font-size: 10px;
-      text-align: center;
-      color: inherit;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      border: 2px solid var(--bg-panel);
     }
     .slider-container {
       display: flex;
@@ -175,9 +203,12 @@
     .slider-container input {
       flex-grow: 1;
     }
-    :root {
-      --slider-track: rgba(0, 0, 0, 0.1);
-      --slider-thumb: #007bff;
+    .slider-container span {
+      font-variant-numeric: tabular-nums;
+      font-size: 12px;
+      color: var(--text-dim);
+      min-width: 42px;
+      text-align: right;
     }
     .setting-checkbox {
       display: flex;
@@ -187,66 +218,119 @@
     }
     .setting-checkbox label {
       margin-right: 0;
-    }
-    .setting-checkbox input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    #custom-color-pickers {
-      display: none;
-      margin-top: 4px;
-    }
-    #custom-color-pickers .color-picker-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    #custom-color-pickers .color-picker-row label {
-      margin-right: 0;
       font-size: 13px;
     }
-    #custom-color-pickers input[type="color"] {
-      width: 40px;
-      height: 25px;
-      border: none;
-      padding: 0;
-      background: none;
+    .setting-checkbox input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
       cursor: pointer;
     }
+    .btn-row {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-row button {
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      flex: 1;
+    }
+    .btn-row button:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-row button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-row button.active {
+      background: var(--accent);
+      color: #0a0a0a;
+      border-color: var(--accent);
+    }
     .hint {
-      font-size: 12px;
-      margin-top: 6px;
-      color: #666;
-      border-top: 1px solid #eee;
-      padding-top: 4px;
+      font-size: 11px;
+      margin-top: 4px;
+      color: var(--text-dim);
+      line-height: 1.5;
     }
     kbd {
-      background: #e0e0e0;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-weight: bold;
-      font-size: 14px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      color: #333;
+      background: var(--bg-app);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--text);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
     }
     details {
-      margin-top: 6px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
       font-size: 12px;
-      color: #666;
-      border-top: 1px solid #eee;
-      padding-top: 4px;
     }
     details summary {
       cursor: pointer;
-      font-weight: 500;
-      outline: none;
+      font-weight: 700;
+      color: var(--text-dim);
       user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 11px;
+      outline: none;
     }
     details[open] summary {
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
+
+    /* ---- Credit row at the end of the settings menu ---- */
+    .credit {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    /* GitHub-style circular avatar wrapper — inline SVG lives inside */
+    .credit-avatar {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #36353A;
+      display: block;
+      line-height: 0;
+    }
+    .credit-avatar svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .credit a {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      line-height: 1.35;
+    }
+    .credit a:hover {
+      text-decoration: underline;
+    }
+    
+    .ripple-indicator { display: none; }
   </style>
 </head>
 <body>
@@ -263,16 +347,33 @@
     <h3>Settings</h3>
     <div class="setting">
       <label>Theme</label>
-      <div id="color-swatches" class="color-swatches"></div>
-      <div id="custom-color-pickers">
-        <div class="color-picker-row">
-          <label for="custom-background">Background</label>
-          <input type="color" id="custom-background" value="#ffffff">
-        </div>
-        <div class="color-picker-row">
-          <label for="custom-hand">Hands</label>
-          <input type="color" id="custom-hand" value="#000000">
-        </div>
+      <div class="theme-pill" id="theme-pill">
+        <button data-theme="dark" class="active">Dark</button>
+        <button data-theme="light">Light</button>
+      </div>
+    </div>
+    <div class="setting">
+      <label>Pattern</label>
+      <div class="btn-row">
+        <button id="pattern-prev-btn">Previous</button>
+        <button id="pattern-next-btn">Next</button>
+      </div>
+      <div class="btn-row" style="margin-top:6px;">
+        <button id="show-time-btn">Show time</button>
+      </div>
+    </div>
+    <div class="setting setting-checkbox">
+      <label for="hour-format-toggle">24‑hour format</label>
+      <input type="checkbox" id="hour-format-toggle" checked>
+    </div>
+    <div class="setting setting-checkbox">
+      <label for="mouse-follow-toggle">Mouse follow</label>
+      <input type="checkbox" id="mouse-follow-toggle">
+    </div>
+    <div class="setting">
+      <label>Fullscreen</label>
+      <div class="btn-row">
+        <button id="fullscreen-btn">Toggle fullscreen</button>
       </div>
     </div>
     <div class="setting">
@@ -281,225 +382,316 @@
         <input type="range" id="transition-slider" min="1" max="20" step="0.2">
         <span id="transition-value">20.0s</span>
       </div>
-      <details>
-        <summary>Keyboard shortcuts</summary>
-        <div class="hint">
-          Press <kbd>C</kbd> to change pattern
-        </div>
-        <div class="hint">
-          Press <kbd>F</kbd> to Show/Hide Settings
-        </div>
-        <div class="hint">
-          Press <kbd>M</kbd> to follow cursor / resume animation
-        </div>
-        <div class="hint">
-          Press <kbd>R</kbd> for random theme
-        </div>
-        <div class="hint">
-          Press <kbd>Space</kbd> to see time
-        </div>
-      </details>
+    </div>
+
+    <!-- Round profile icon (YOUR EXACT SVG, inline) + project name link, at the very end of settings -->
+    <div class="credit">
+      <span class="credit-avatar" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 460">
+          <path d="M0 0 C151.8 0 303.6 0 460 0 C460 151.8 460 303.6 460 460 C308.2 460 156.4 460 0 460 C0 308.2 0 156.4 0 0 Z " fill="#36353A" transform="translate(0,0)"/>
+          <path d="M0 0 C30.36 0 60.72 0 92 0 C92 15.67 92 15.67 90.56 21.25 C89.59 25.25 88.88 28.89 88.75 33 C88.31 38.86 85.42 43.65 82.7 48.72 C81.34 51.35 80.28 53.77 79.38 56.56 C77.82 60.46 76.09 62.2 73 65 C71.99 66.18 70.99 67.36 70 68.56 C68.25 70.64 66.7 72.24 64.56 73.94 C59.64 77.9 55.73 82.93 52 88 C52.73 88.26 53.47 88.52 54.23 88.79 C57.07 90.03 59 91.45 61.38 93.44 C69.07 99.58 77.55 102.29 87.44 102.25 C88.67 102.26 89.91 102.26 91.18 102.27 C94.59 102.03 97.57 101.4 100.86 100.51 C104.85 99.56 108.92 99.25 113 98.88 C114.28 98.75 114.28 98.75 115.58 98.61 C129.85 97.23 129.85 97.23 134 100 C133.75 100.94 133.49 101.89 133.23 102.86 C133.07 103.47 132.9 104.09 132.73 104.72 C132.37 106.09 132 107.45 131.63 108.81 C130.77 111.98 129.97 115.14 129.28 118.35 C127.75 125.43 125.25 130.2 121 136 C119.6 138.3 118.31 140.65 117 143 C116.56 143.72 116.12 144.44 115.67 145.19 C114.34 147.43 113.06 149.67 111.81 151.95 C111.42 152.65 111.03 153.36 110.63 154.08 C109.83 155.54 109.03 157 108.23 158.47 C105.22 163.89 105.22 163.89 103 165 C101.96 166.98 100.97 168.98 100 171 C93.95 181.53 93.95 181.53 91 183 C85.18 183.32 79.9 182.54 74.18 181.51 C69.96 180.83 65.75 180.52 61.5 180.25 C59 180 59 180 56 179 C54.52 176.04 54.56 174.3 55 171 C56.71 168.37 58.64 166.07 61 164 C61.66 164 62.32 164 63 164 C63.27 163.42 63.54 162.84 63.81 162.25 C65 160 65 160 68 156 C53.48 156 38.96 156 24 156 C29.34 162.77 29.34 162.77 35.06 169.19 C37 172 37 172 36.62 175.68 C36.42 176.77 36.21 177.87 36 179 C31.88 179.68 27.75 180.34 23.62 181 C22.47 181.19 21.31 181.38 20.12 181.58 C5.18 183.94 5.18 183.94 0 183 C-2.76 180.75 -4.12 178.14 -5.75 175 C-9.45 168.06 -13.67 161.53 -18 154.97 C-18.64 153.99 -19.28 153.01 -19.94 152 C-20.52 151.11 -21.11 150.23 -21.71 149.31 C-23 147 -23 147 -23 144 C-23.66 144 -24.32 144 -25 144 C-25.45 143.17 -25.89 142.33 -26.36 141.47 C-26.96 140.35 -27.56 139.22 -28.19 138.06 C-28.51 137.46 -28.83 136.86 -29.15 136.25 C-30.52 133.69 -31.9 131.16 -33.44 128.7 C-38.92 119.89 -40.68 109.16 -42 99 C-33.53 98.78 -25.48 99.03 -17.09 100.22 C-10.78 101.09 -4.49 101.45 1.87 101.75 C5 102 5 102 7 103 C6.86 104.42 6.71 105.83 6.56 107.25 C6.48 108.04 6.4 108.83 6.32 109.64 C6.02 111.83 5.54 113.87 5 116 C4.22 122.48 5.6 125.66 9.13 131.06 C11.41 134.65 13.39 138.36 15.38 142.12 C15.73 142.8 16.09 143.48 16.46 144.17 C17.31 145.78 18.15 147.39 19 149 C18.36 143.21 16.87 137.93 15.12 132.38 C12.96 125.37 11.05 118.42 9.54 111.24 C9.22 109.04 9.22 109.04 8 108 C7.96 106.33 7.96 104.67 8 103 C8.93 102.75 9.86 102.5 10.81 102.25 C15.18 101.01 19.4 99.41 23.64 97.8 C26 97 26 97 28 97 C28.09 96.39 28.17 95.77 28.26 95.14 C29 93 29 93 30.74 91.77 C31.45 91.45 32.15 91.14 32.88 90.81 C33.57 90.49 34.27 90.17 34.99 89.83 C36.63 89.15 38.31 88.56 40 88 C38.46 85.07 37.17 83.14 34.56 81.06 C32 79 32 79 30.06 76.06 C28.15 73.22 26.31 71.56 23.64 69.48 C16.67 63.22 11.51 54.56 8 46 C7.51 45.1 7.02 44.21 6.51 43.28 C0.68 30.59 1.19 13.12 0 0 Z " fill="#5A595A" transform="translate(183,92)"/>
+          <path d="M0 0 C30.36 0 60.72 0 92 0 C92 15.67 92 15.67 90.56 21.25 C89.59 25.25 88.88 28.89 88.75 33 C88.31 38.8 85.51 43.49 82.79 48.51 C81.46 51.1 80.38 53.5 79.39 56.22 C79.13 56.93 78.86 57.64 78.59 58.37 C78.3 59.18 78.3 59.18 78 60 C70 60.16 62.01 60.29 54.01 60.36 C50.29 60.4 46.58 60.45 42.87 60.53 C39.28 60.6 35.7 60.65 32.11 60.66 C30.74 60.68 29.38 60.7 28.01 60.74 C17.33 61.02 17.33 61.02 14.08 58.52 C12.75 56.71 11.85 55.07 11 53 C10.46 51.82 9.93 50.65 9.38 49.44 C8.69 47.74 8.69 47.74 8 46 C7.26 44.66 7.26 44.66 6.51 43.29 C0.67 30.6 1.19 13.12 0 0 Z " fill="#8C8C8C" transform="translate(183,92)"/>
+          <path d="M0 0 C-0.25 0.94 -0.51 1.89 -0.77 2.86 C-0.93 3.47 -1.1 4.09 -1.27 4.72 C-1.63 6.09 -2 7.45 -2.37 8.81 C-3.23 11.98 -4.03 15.14 -4.72 18.35 C-6.25 25.43 -8.75 30.2 -13 36 C-14.4 38.3 -15.69 40.65 -17 43 C-17.44 43.72 -17.88 44.44 -18.33 45.19 C-19.66 47.43 -20.94 49.67 -22.19 51.95 C-22.58 52.65 -22.97 53.36 -23.37 54.08 C-24.17 55.54 -24.97 57 -25.77 58.47 C-28.78 63.89 -28.78 63.89 -31 65 C-32.04 66.98 -33.03 68.98 -34 71 C-40.05 81.53 -40.05 81.53 -43 83 C-48.82 83.32 -54.1 82.54 -59.82 81.51 C-64.04 80.83 -68.25 80.52 -72.5 80.25 C-75 80 -75 80 -78 79 C-79.48 76.04 -79.44 74.3 -79 71 C-77.29 68.37 -75.36 66.07 -73 64 C-72.34 64 -71.68 64 -71 64 C-70.73 63.42 -70.46 62.84 -70.19 62.25 C-68.98 59.97 -67.59 58.03 -66 56 C-67.65 56 -69.3 56 -71 56 C-70.67 54.68 -70.34 53.36 -70 52 C-69.67 52 -69.34 52 -69 52 C-68.67 50.35 -68.34 48.7 -68 47 C-67.67 47.66 -67.34 48.32 -67 49 C-66.34 49 -65.68 49 -65 49 C-65 49.99 -65 50.98 -65 52 C-64.34 52 -63.68 52 -63 52 C-62.9 51.44 -62.8 50.88 -62.7 50.3 C-61.02 41.28 -58.46 32.53 -55.66 23.79 C-55.44 23.09 -55.21 22.38 -54.98 21.66 C-54.55 20.3 -54.11 18.95 -53.66 17.59 C-52.31 13.38 -51.51 9.38 -51 5 C-47.76 7.59 -47.21 10.23 -46.31 14.19 C-46.06 15.27 -45.81 16.36 -45.55 17.48 C-45.37 18.31 -45.19 19.14 -45 20 C-32.7 22.2 -20.44 23.83 -8 25 C-11.18 18.37 -14.67 11.97 -18.41 5.65 C-21 1.21 -21 1.21 -21 -1 C-4.36 -2.91 -4.36 -2.91 0 0 Z " fill="#59595A" transform="translate(317,192)"/>
+          <path d="M0 0 C3.43 1.29 6.5 2.78 9.62 4.69 C10.49 5.21 11.35 5.74 12.25 6.29 C16 8.62 19.73 11.01 23.45 13.41 C25.61 14.76 27.79 15.96 30.06 17.12 C33.47 19.3 33.81 20.25 35 24 C35.32 25.87 35.58 27.75 35.78 29.64 C35.9 30.71 36.02 31.78 36.14 32.89 C36.26 34 36.38 35.11 36.5 36.25 C37.22 42.98 38.02 49.54 39.6 56.12 C40.38 59.77 40.12 63.29 40 67 C34.69 67.16 29.9 66.56 24.69 65.56 C18.29 64.4 12.05 63.74 5.56 63.5 C-1.3 63.25 -7.48 62.28 -14 60 C-13.74 54.07 -11.69 50.37 -8.47 45.43 C-5.67 40.81 -4.67 36.66 -4 31.31 C-3.45 27.16 -2.85 23.09 -1.94 19 C-0.61 12.74 -0.35 6.38 0 0 Z " fill="#59595A" transform="translate(275,92)"/>
+          <path d="M0 0 C2.2 3.3 2.39 4.89 2.75 8.78 C2.92 10.51 2.92 10.51 3.1 12.28 C3.32 14.68 3.54 17.09 3.77 19.49 C4.83 30.11 6.27 39.87 12 49 C13.07 51.31 14.02 53.65 15 56 C15.66 57.34 16.32 58.67 17 60 C10.46 61.61 4.2 62.22 -2.5 62.5 C-8.27 62.74 -13.74 63.13 -19.38 64.45 C-23.09 65.23 -26.81 65.71 -30.56 66.19 C-31.28 66.28 -32 66.38 -32.73 66.48 C-34.48 66.7 -36.24 66.85 -38 67 C-38.33 66.67 -38.66 66.34 -39 66 C-38.81 64.17 -38.6 62.33 -38.35 60.5 C-37.96 57.73 -37.64 54.96 -37.32 52.18 C-37.07 50.08 -36.81 47.98 -36.56 45.88 C-36.44 44.82 -36.32 43.76 -36.19 42.67 C-35.57 37.51 -34.75 32.91 -33 28 C-32.96 26.5 -32.96 25 -33 23.5 C-32.72 20.23 -32.35 19.3 -29.82 17.12 C-26.3 15 -22.9 13.3 -19 12 C-18.67 11.34 -18.34 10.68 -18 10 C-15.37 8.6 -12.75 7.28 -10.06 6 C-8.59 5.3 -7.13 4.59 -5.66 3.88 C-4.68 3.41 -4.68 3.41 -3.68 2.93 C-1.81 2 -1.81 2 0 0 Z " fill="#59595A" transform="translate(182,92)"/>
+          <path d="M0 0 C0.89 0.45 0.89 0.45 1.79 0.91 C12.92 6.42 25 9.52 37.31 6 C41.98 4.73 46.26 3.58 51 5 C53.76 7.95 55.26 11.38 57 15 C58.09 16.78 59.19 18.55 60.31 20.31 C62.36 23.56 63.43 26.19 64 30 C51.59 30.44 39.18 28.17 27 26 C25.33 21 23.67 16 22 11 C21.75 12.03 21.5 13.06 21.25 14.12 C17.64 28.53 13.17 42.75 9 57 C8.34 57 7.68 57 7 57 C1.53 26.14 1.53 26.14 1 11 C0.71 7.33 0.36 3.66 0 0 Z " fill="#8B8B8B" transform="translate(245,187)"/>
+          <path d="M0 0 C-0.25 0.94 -0.51 1.89 -0.77 2.86 C-0.93 3.47 -1.1 4.09 -1.27 4.72 C-1.63 6.09 -2 7.45 -2.37 8.81 C-3.74 13.91 -4.93 19.04 -6 24.22 C-6.33 25.14 -6.66 26.05 -7 27 C-7.22 27.63 -7.44 28.25 -7.66 28.9 C-8.85 31.33 -9.74 32.48 -12 34 C-17.27 34.77 -22.41 34.38 -27.69 34 C-29.14 33.93 -30.59 33.85 -32.05 33.79 C-42.51 33.24 -42.51 33.24 -45 32 C-45 33.98 -45 35.96 -45 38 C-46.65 38 -48.3 38 -50 38 C-50.33 41.96 -50.66 45.92 -51 50 C-51.66 50 -52.32 50 -53 50 C-53.33 48.02 -53.66 46.04 -54 44 C-54.33 47.96 -54.66 51.92 -55 56 C-61 56 -61 56 -64 54 C-61.54 43.92 -58.92 33.96 -55.74 24.08 C-55.51 23.38 -55.29 22.68 -55.06 21.95 C-54.62 20.56 -54.17 19.18 -53.71 17.79 C-52.34 13.51 -51.52 9.45 -51 5 C-47.76 7.59 -47.21 10.23 -46.31 14.19 C-46.06 15.27 -45.81 16.36 -45.55 17.48 C-45.37 18.31 -45.19 19.14 -45 20 C-32.7 22.2 -20.44 23.83 -8 25 C-11.18 18.37 -14.67 11.97 -18.41 5.65 C-21 1.21 -21 1.21 -21 -1 C-4.36 -2.91 -4.36 -2.91 0 0 Z " fill="#59595A" transform="translate(317,192)"/>
+          <path d="M0 0 C20.46 0 40.92 0 62 0 C60.02 2.97 60.02 2.97 58 6 C57.03 7.57 57.03 7.57 56.05 9.17 C49.93 17.94 49.93 17.94 43.99 19.06 C40.17 19.46 36.4 19.42 32.57 19.23 C30.17 19.12 27.79 19.11 25.39 19.11 C23.86 19.08 22.33 19.05 20.79 19.01 C19.73 19 19.73 19 18.65 18.99 C15.86 18.83 13.64 18.55 11.48 16.69 C10.23 15.2 9.11 13.6 8 12 C7.26 11.11 6.52 10.22 5.76 9.3 C5.08 8.46 4.39 7.62 3.69 6.75 C2.99 5.9 2.29 5.05 1.57 4.17 C0 2 0 2 0 0 Z " fill="#8C8B8C" transform="translate(199,306)"/>
+          <path d="M0 0 C3.3 0 6.6 0 10 0 C11.42 2.83 11.12 5.21 11.11 8.38 C11.11 9.03 11.11 9.69 11.11 10.36 C11.11 12.52 11.11 14.69 11.1 16.85 C11.1 18.35 11.09 19.85 11.09 21.35 C11.09 25.3 11.08 29.25 11.07 33.2 C11.06 37.22 11.05 41.25 11.05 45.28 C11.04 53.19 11.02 61.09 11 69 C6.71 69 2.42 69 -2 69 C-2.13 53.15 -1.76 37.39 -1 21.56 C-0.9 19.45 -0.81 17.34 -0.71 15.23 C-0.48 10.15 -0.24 5.08 0 0 Z " fill="#8C8C8C" transform="translate(224,179)"/>
+          <path d="M0 0 C4.29 0.31 8.58 0.62 12.88 0.94 C14.1 1.02 15.32 1.11 16.58 1.2 C17.75 1.29 18.92 1.38 20.12 1.46 C21.74 1.58 21.74 1.58 23.39 1.7 C26 2 26 2 28 3 C27.59 9.16 26.66 14.39 24 20 C21.24 21.77 18.65 22.38 15.44 22.85 C14.56 22.98 13.69 23.11 12.79 23.24 C11.41 23.43 11.41 23.43 10 23.62 C9.06 23.76 8.13 23.89 7.16 24.02 C0.39 24.93 -6.16 25.38 -13 25 C-9.53 16.16 -4.82 8.15 0 0 Z " fill="#8B8B8B" transform="translate(162,192)"/>
+          <path d="M0 0 C3.3 0 6.6 0 10 0 C10 0.66 10 1.32 10 2 C11.32 2 12.64 2 14 2 C14 2.66 14 3.32 14 4 C15.07 4.14 16.15 4.29 17.25 4.44 C21 5 21 5 22.94 5.53 C25.27 6.06 27.36 6.1 29.75 6.06 C31.15 6.04 32.56 6.02 34 6 C33.67 10.62 33.34 15.24 33 20 C32.01 20 31.02 20 30 20 C29.67 16.7 29.34 13.4 29 10 C28.67 13.3 28.34 16.6 28 20 C21.07 20 14.14 20 7 20 C7 20.66 7 21.32 7 22 C6.43 21.67 5.87 21.35 5.28 21.01 C2.78 19.9 1.21 19.79 -1.5 19.88 C-2.25 19.89 -3.01 19.91 -3.78 19.93 C-4.51 19.95 -5.25 19.98 -6 20 C-7.32 20 -8.64 20 -10 20 C-10 15.38 -10 10.76 -10 6 C-9.01 6 -8.02 6 -7 6 C-7.33 4.68 -7.66 3.36 -8 2 C-5.36 2 -2.72 2 0 2 C0 1.34 0 0.68 0 0 Z " fill="#39373C" transform="translate(220,366)"/>
+          <path d="M0 0 C-1.81 19.47 -1.81 19.47 -3.06 26.12 C-4.12 31.9 -4.39 37.65 -4.57 43.51 C-4.77 48.59 -5.62 53.1 -7 58 C-7.66 58 -8.32 58 -9 58 C-9.15 57.37 -9.29 56.73 -9.45 56.08 C-11.28 48.44 -13.5 40.97 -15.8 33.46 C-17.62 27.43 -19.16 21.41 -20.46 15.24 C-20.78 13.04 -20.78 13.04 -22 12 C-22.04 10.33 -22.04 8.67 -22 7 C-21.07 6.75 -20.14 6.5 -19.19 6.25 C-13.23 4.55 -6.04 0 0 0 Z " fill="#8A8A8B" transform="translate(213,188)"/>
+          <path d="M0 0 C4.12 1.05 5.48 0.24 9.44 -1.12 C17.54 -1.78 28.81 -2.23 35.78 2.45 C36.33 2.92 36.87 3.39 37.44 3.88 C23.78 8.9 23.78 8.9 19.06 10 C16.29 10.67 14.04 11.42 11.44 12.5 C3.28 15.6 -4.49 13.37 -12.56 10.88 C-12.89 10.55 -13.22 10.21 -13.56 9.88 C-14.91 9.55 -16.27 9.27 -17.62 9 C-22.16 8.04 -26.27 6.59 -30.56 4.88 C-30.56 4.21 -30.56 3.56 -30.56 2.88 C-20.88 -1.63 -10.4 -3.03 0 0 Z " fill="#58585A" transform="translate(226.5625,284.125)"/>
+          <path d="M0 0 C2.97 0 5.94 0 9 0 C9 1.32 9 2.64 9 4 C10.32 4 11.64 4 13 4 C13.33 5.32 13.66 6.64 14 8 C14.99 8 15.98 8 17 8 C17 12.62 17 17.24 17 22 C15.17 22.22 15.17 22.22 13.31 22.44 C10.9 22.74 8.57 23.09 6.19 23.56 C4 24 4 24 1 24 C1 23.34 1 22.68 1 22 C-0.92 22.06 -0.92 22.06 -2.88 22.12 C-5.05 22.2 -5.05 22.2 -7 22 C-9 20 -9 20 -9.23 17.69 C-9.22 16.8 -9.2 15.91 -9.19 15 C-9.18 14.11 -9.17 13.23 -9.17 12.31 C-9 10 -9 10 -8 8 C-7.01 8 -6.02 8 -5 8 C-5 6.68 -5 5.36 -5 4 C-3.68 4 -2.36 4 -1 4 C-0.67 2.68 -0.34 1.36 0 0 Z " fill="#383538" transform="translate(267,364)"/>
+          <path d="M0 0 C3.22 3.73 4.85 7.99 6.69 12.5 C7.01 13.26 7.33 14.02 7.66 14.8 C7.96 15.54 8.26 16.27 8.57 17.03 C8.85 17.7 9.12 18.36 9.41 19.05 C10 21 10 21 10 25 C6.73 24.86 3.46 24.71 0.19 24.56 C-0.74 24.52 -1.67 24.48 -2.63 24.44 C-3.52 24.4 -4.41 24.36 -5.33 24.32 C-6.15 24.28 -6.98 24.24 -7.82 24.21 C-10 24 -10 24 -13 23 C-14.48 20.04 -14.44 18.3 -14 15 C-12.29 12.37 -10.36 10.07 -8 8 C-7.34 8 -6.68 8 -6 8 C-5.75 7.42 -5.5 6.84 -5.25 6.25 C-3.83 3.7 -2.12 1.98 0 0 Z " fill="#8A8A8A" transform="translate(252,248)"/>
+          <path d="M0 0 C4.12 3.07 7.54 6.52 10.94 10.38 C12.13 11.72 12.13 11.72 13.34 13.09 C15 16 15 16 14 23 C6.08 23.99 -1.84 24.98 -10 26 C-9.11 21.57 -7.82 17.71 -6.12 13.56 C-5.74 12.6 -5.74 12.6 -5.35 11.62 C-3.74 7.64 -1.97 3.81 0 0 Z " fill="#8A8A8B" transform="translate(205,248)"/>
+          <path d="M0 0 C3.96 0 7.92 0 12 0 C11.97 2.31 11.93 4.62 11.9 6.93 C11.77 8.99 11.77 8.99 13 10 C13.33 6.7 13.66 3.4 14 0 C17.96 0 21.92 0 26 0 C25.67 4.62 25.34 9.24 25 14 C24.01 14 23.02 14 22 14 C21.5 9.05 21.5 9.05 21 4 C20.67 7.3 20.34 10.6 20 14 C13.4 14 6.8 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#CCCAC9" transform="translate(228,372)"/>
+          <path d="M0 0 C3.86 3.36 4.42 7.06 5 12 C5.01 17.15 3.69 20.67 1 25 C-0.08 27.1 -1.14 29.2 -2.19 31.31 C-2.98 32.92 -2.98 32.92 -3.79 34.55 C-4.39 35.76 -4.39 35.76 -5 37 C-5.66 37 -6.32 37 -7 37 C-7.33 38.98 -7.66 40.96 -8 43 C-8.66 43 -9.32 43 -10 43 C-10.33 43.66 -10.66 44.32 -11 45 C-10.28 35.94 -7.41 27.4 -4.66 18.79 C-4.44 18.08 -4.21 17.38 -3.98 16.65 C-3.55 15.3 -3.11 13.94 -2.66 12.59 C-1.31 8.38 -0.51 4.38 0 0 Z " fill="#39393B" transform="translate(266,197)"/>
+          <path d="M0 0 C5.33 0 10.67 0 16 0 C16 4.62 16 9.24 16 14 C10.67 14 5.33 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#D1CDCD" transform="translate(176,372)"/>
+          <path d="M0 0 C6 0 6 0 7.62 1.5 C8.08 2 8.53 2.49 9 3 C9.66 2.01 10.32 1.02 11 0 C12.65 0 14.3 0 16 0 C15.67 4.62 15.34 9.24 15 14 C12.33 13.33 9.67 12.67 7 12 C7 12.66 7 13.32 7 14 C6.01 14 5.02 14 4 14 C3.67 13.34 3.34 12.68 3 12 C2.67 12.66 2.34 13.32 2 14 C1.34 14 0.68 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#3A3839" transform="translate(193,372)"/>
+          <path d="M0 0 C4 0 8 0 12 0 C14.3 9.41 14.3 9.41 14 14 C13.01 14 12.02 14 11 14 C11 13.34 11 12.68 11 12 C10.34 12 9.68 12 9 12 C9 12.66 9 13.32 9 14 C2.95 14.2 2.95 14.2 1 14 C-1 12 -1 12 -1.23 9.69 C-1.22 8.8 -1.2 7.91 -1.19 7 C-1.18 6.11 -1.17 5.23 -1.17 4.31 C-1 2 -1 2 0 0 Z " fill="#CECCCC" transform="translate(259,372)"/>
+          <path d="M0 0 C4.33 0 8.67 0 13 0 C13 4.62 13 9.24 13 14 C8.67 14 4.33 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#C8C6C6" transform="translate(210,372)"/>
+          <path d="M0 0 C2.48 0.5 2.48 0.5 5 1 C6.65 0.67 8.3 0.34 10 0 C10 4.62 10 9.24 10 14 C6.7 13.67 3.4 13.34 0 13 C0 8.71 0 4.42 0 0 Z " fill="#D4D2D2" transform="translate(274,372)"/>
+          <path d="M0 0 C1.98 0 3.96 0 6 0 C7.74 1.74 7.17 4.08 7.19 6.44 C7.2 7.43 7.22 8.41 7.23 9.43 C7 12 7 12 5 14 C3.35 14 1.7 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#D2CFD0" transform="translate(168,372)"/>
+          <path d="M0 0 C1.65 0 3.3 0 5 0 C6.18 2.35 6.13 3.82 6.12 6.44 C6.13 7.22 6.13 8 6.13 8.81 C6 11 6 11 5 14 C3.35 14 1.7 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#CAC7C5" transform="translate(176,372)"/>
+          <path d="M0 0 C2 0 4 0 6 0 C6 4.62 6 9.24 6 14 C5.34 14 4.68 14 4 14 C3.67 13.34 3.34 12.68 3 12 C2.67 12.66 2.34 13.32 2 14 C1.34 14 0.68 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#CDCACB" transform="translate(193,372)"/>
+          <path d="M0 0 C1.65 0 3.3 0 5 0 C5 4.62 5 9.24 5 14 C3.35 14 1.7 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#CDCACC" transform="translate(285,372)"/>
+          <path d="M0 0 C0.99 0 1.98 0 3 0 C3 4.29 3 8.58 3 13 C3.66 13 4.32 13 5 13 C5.33 12.01 5.66 11.02 6 10 C6 10.99 6 11.98 6 13 C7.32 12.67 8.64 12.34 10 12 C10 12.66 10 13.32 10 14 C8.58 14.34 7.17 14.67 5.75 15 C4.96 15.19 4.17 15.37 3.36 15.56 C1 16 1 16 -3 16 C-3 14.68 -3 13.36 -3 12 C-2.34 12 -1.68 12 -1 12 C-1 12.66 -1 13.32 -1 14 C-0.01 14 0.98 14 2 14 C1.34 9.38 0.68 4.76 0 0 Z " fill="#535153" transform="translate(271,372)"/>
+          <path d="M0 0 C1.98 0 3.96 0 6 0 C6 3.3 6 6.6 6 10 C4.68 9.67 3.36 9.34 2 9 C1.67 10.65 1.34 12.3 1 14 C0.67 14 0.34 14 0 14 C0 9.38 0 4.76 0 0 Z " fill="#ADABA8" transform="translate(234,372)"/>
+          <path d="M0 0 C1.65 0 3.3 0 5 0 C4.67 4.62 4.34 9.24 4 14 C3.01 14 2.02 14 1 14 C0.83 12.42 0.66 10.83 0.5 9.25 C0.41 8.37 0.31 7.49 0.22 6.58 C0 4 0 4 0 0 Z " fill="#CAC7CA" transform="translate(204,372)"/>
+          <path d="M0 0 C0.72 0.19 1.44 0.37 2.19 0.56 C5.37 1.22 5.37 1.22 10 0 C10 4.62 10 9.24 10 14 C9.67 14 9.34 14 9 14 C9 9.71 9 5.42 9 1 C8.01 2.49 8.01 2.49 7 4 C3.38 4.19 3.38 4.19 0 4 C0 2.68 0 1.36 0 0 Z " fill="#AEACAC" transform="translate(274,372)"/>
+          <path d="M0 0 C1.06 1.81 1.06 1.81 2 4 C1.67 4.99 1.34 5.98 1 7 C1.99 7 2.98 7 4 7 C4 8.32 4 9.64 4 11 C2.35 11 0.7 11 -1 11 C-1.12 3.38 -1.12 3.38 0 0 Z " fill="#D3CED0" transform="translate(177,375)"/>
+          <path d="M0 0 C1.32 0 2.64 0 4 0 C3.67 1.98 3.34 3.96 3 6 C2.01 6 1.02 6 0 6 C-0.38 4.34 -0.71 2.68 -1 1 C-0.67 0.67 -0.34 0.34 0 0 Z " fill="#CFCDCB" transform="translate(236,372)"/>
+          <path d="M0 0 C0.33 0 0.66 0 1 0 C1 3.63 1 7.26 1 11 C1.99 11 2.98 11 4 11 C4 11.66 4 12.32 4 13 C1.69 12.67 -0.62 12.34 -3 12 C-2.01 11.67 -1.02 11.34 0 11 C0 7.37 0 3.74 0 0 Z " fill="#484648" transform="translate(284,375)"/>
+          <path d="M0 0 C0 2.97 0 5.94 0 9 C-1.32 8.67 -2.64 8.34 -4 8 C-4 7.34 -4 6.68 -4 6 C-3.34 5.67 -2.68 5.34 -2 5 C-1.67 4.01 -1.34 3.02 -1 2 C-1.66 1.67 -2.32 1.34 -3 1 C-1 0 -1 0 0 0 Z " fill="#848080" transform="translate(182,374)"/>
+          <path d="M0 0 C0.99 0 1.98 0 3 0 C3 0.66 3 1.32 3 2 C3.66 2.33 4.32 2.66 5 3 C3.62 4.5 3.62 4.5 2 6 C1.34 6 0.68 6 0 6 C0 4.02 0 2.04 0 0 Z " fill="#D6D4D1" transform="translate(235,380)"/>
+        </svg>
+      </span>
+      <a href="https://github.com/Hammad-Infinity/Million-Times-Clock" target="_blank" rel="noopener noreferrer">Million Times Clock</a>
     </div>
   </div>
 
 <script>
 (() => {
-  const Cols = 16;
-  const Rows = 8;
-
-  let backColor   = { r: 255, g: 255, b: 255, a: 1.0 };
-  let handColor   = { r:   0, g:   0, b:   0, a: 1.0 };
-  let shadowColor = { r: 200, g: 200, b: 200, a: 0.61 }; 
-
-  let TransitionSeconds = 20.0;
+  const Cols = 28;
+  const Rows = 14;
+  let backColor = {
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 1
+  };
+  let handColor = {
+    r: 0,
+    g: 0,
+    b: 0,
+    a: 1
+  };
+  let shadowColor = {
+    r: 200,
+    g: 200,
+    b: 200,
+    a: .61
+  };
+  let TransitionSeconds = 20;
   let is24Hour = true;
-
-  const MAX_FPS = 20;
+  const MAX_FPS = 60;
   const FRAME_INTERVAL = 1 / MAX_FPS;
   let lastRenderSec = 0;
-
   const HAND_SHADOW_OFFSET = 4;
-  const HAND_SHADOW_BLUR   = 8;
-  const HAND_SHADOW_ALPHA  = 0.30;
-  const MOUSE_FOLLOW_SMOOTHING = 0.03;
-
+  const HAND_SHADOW_BLUR = 8;
+  const HAND_SHADOW_ALPHA = .3;
+  const MOUSE_FOLLOW_SMOOTHING = .18;
   let PatternPeriodSeconds = TransitionSeconds;
-  const totalPattern = 12;
+  const totalPattern = 22;
   let patternIndex = 4;
-
   let colorTransition = null;
-
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const lerp  = (a, b, t) => a + (b - a) * t;
+  const lerp = (a, b, t) => a + (b - a) * t;
   const lerpColor = (c1, c2, t) => ({
     r: Math.round(lerp(c1.r, c2.r, t)),
     g: Math.round(lerp(c1.g, c2.g, t)),
     b: Math.round(lerp(c1.b, c2.b, t)),
     a: lerp(c1.a, c2.a, t)
   });
-
   function startColorTransition(targetBack, targetHand, targetShadow) {
     colorTransition = {
-      startBack: { ...backColor },
-      startHand: { ...handColor },
-      startShadow: { ...shadowColor },
-      targetBack: { ...targetBack },
-      targetHand: { ...targetHand },
-      targetShadow: { ...targetShadow },
-      startSec: performance.now() / 1000,
-      duration: 0.4
+      startBack: {
+        ...backColor
+      },
+      startHand: {
+        ...handColor
+      },
+      startShadow: {
+        ...shadowColor
+      },
+      targetBack: {
+        ...targetBack
+      },
+      targetHand: {
+        ...targetHand
+      },
+      targetShadow: {
+        ...targetShadow
+      },
+      startSec: performance.now() / 1e3,
+      duration: .4
     };
   }
-
   function deriveShadow(bg) {
-    const factor = 0.6;
+    const factor = .6;
     return {
       r: Math.round(bg.r * factor),
       g: Math.round(bg.g * factor),
       b: Math.round(bg.b * factor),
-      a: 0.6
+      a: .6
     };
   }
-
-  function updateModalTheme() {
-    const modal = document.getElementById('settings-modal');
-    if (!modal) return;
-
-    const bgColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
-    modal.style.backgroundColor = bgColor;
-
-    const luminance = (0.299 * backColor.r + 0.587 * backColor.g + 0.114 * backColor.b) / 255;
-    const textColor = luminance > 0.5 ? '#333' : '#f0f0f0';
-    modal.style.color = textColor;
-    modal.style.borderColor = luminance > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)';
-
-    const trackColor = luminance > 0.5 ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)';
-    document.documentElement.style.setProperty('--slider-track', trackColor);
-
-    const headings = modal.querySelectorAll('h3, label');
-    headings.forEach(el => el.style.color = textColor);
-
-    const hints = modal.querySelectorAll('.hint, details, summary');
-    hints.forEach(h => h.style.color = textColor);
-  }
-
+  function updateModalTheme() {}
   function normalizeDeg(deg) {
     deg %= 360;
     if (deg < 0) deg += 360;
     return deg;
   }
-
   function shortestDeltaDeg(fromDeg, toDeg) {
     let d = normalizeDeg(toDeg) - normalizeDeg(fromDeg);
     d = (d + 540) % 360 - 180;
     return d;
   }
-
   function interpAngleDeg(startDeg, targetDeg, t) {
     const s = normalizeDeg(startDeg);
     const e = normalizeDeg(targetDeg);
     const delta = shortestDeltaDeg(s, e);
     return normalizeDeg(s + delta * t);
   }
-
   function smoothStep(t) {
     t = clamp(t, 0, 1);
     return t * t * (3 - 2 * t);
   }
-
-  const clockStates = [
-    { a: 0,   b: 0   },
-    { a: 0,   b: 90  },
-    { a: 0,   b: 180 },
-    { a: 0,   b: 270 },
-    { a: 90,  b: 90  },
-    { a: 90,  b: 180 },
-    { a: 90,  b: 270 },
-    { a: 180, b: 180 },
-    { a: 180, b: 270 },
-    { a: 270, b: 270 },
-    { a: 0,   b: 225 },
-    { a: 45,  b: 180 },
-    { a: 225, b: 225 },
-  ];
-
-  const numberPatterns = [
-    [[5,6,8],[2,7,2],[2,2,2],[2,2,2],[2,0,2],[1,6,3]],
-    [[12,5,8],[12,2,2],[12,2,2],[12,2,2],[12,2,2],[12,1,3]],
-    [[5,6,8],[1,8,2],[5,3,2],[2,5,3],[2,1,8],[1,6,3]],
-    [[5,6,8],[1,8,2],[5,3,2],[1,8,2],[5,3,2],[1,6,3]],
-    [[5,8,8],[2,2,2],[2,1,2],[1,8,2],[12,2,2],[12,1,3]],
-    [[5,6,8],[2,5,3],[2,1,8],[1,8,2],[5,3,2],[1,6,3]],
-    [[5,6,8],[2,5,3],[2,1,8],[2,7,2],[2,0,2],[1,6,3]],
-    [[5,6,8],[1,8,2],[12,10,10],[11,11,12],[2,2,12],[1,3,12]],
-    [[5,6,8],[2,7,2],[2,0,2],[2,7,2],[2,0,2],[1,6,3]],
-    [[5,6,8],[2,7,2],[2,0,2],[1,8,2],[5,3,2],[1,6,3]],
-  ];
-
+  const clockStates = [ {
+    a: 0,
+    b: 0
+  }, {
+    a: 0,
+    b: 90
+  }, {
+    a: 0,
+    b: 180
+  }, {
+    a: 0,
+    b: 270
+  }, {
+    a: 90,
+    b: 90
+  }, {
+    a: 90,
+    b: 180
+  }, {
+    a: 90,
+    b: 270
+  }, {
+    a: 180,
+    b: 180
+  }, {
+    a: 180,
+    b: 270
+  }, {
+    a: 270,
+    b: 270
+  }, {
+    a: 0,
+    b: 225
+  }, {
+    a: 45,
+    b: 180
+  }, {
+    a: 225,
+    b: 225
+  } ];
+  const numberPatterns = [ [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 2, 2 ], [ 2, 2, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 12, 5, 8 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 8, 8 ], [ 2, 2, 2 ], [ 2, 1, 2 ], [ 1, 8, 2 ], [ 12, 2, 2 ], [ 12, 1, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 5, 3 ], [ 2, 1, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 1, 8, 2 ], [ 12, 10, 10 ], [ 11, 11, 12 ], [ 2, 2, 12 ], [ 1, 3, 12 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 6, 3 ] ], [ [ 5, 6, 8 ], [ 2, 7, 2 ], [ 2, 0, 2 ], [ 1, 8, 2 ], [ 5, 3, 2 ], [ 1, 6, 3 ] ] ];
   function getClockStateForNumber(num, rowInDigit, colInDigit) {
     const idx = numberPatterns[num][rowInDigit][colInDigit];
     return clockStates[idx];
   }
-
+  const letterPatterns = {
+    A: [ [ 12, 12, 12, 12 ], [ 12, 12, 6, 12 ], [ 2, 6, 12, 2 ], [ 2, 0, 12, 2 ], [ 2, 12, 2, 2 ], [ 2, 12, 2, 2 ] ],
+    B: [ [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ] ],
+    C: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
+    D: [ [ 2, 6, 6, 12 ], [ 2, 12, 12, 7 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 7 ], [ 2, 6, 6, 12 ] ],
+    E: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
+    F: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
+    G: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 2, 7 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 6 ] ],
+    H: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 6, 6, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ] ],
+    I: [ [ 6, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 6, 6, 6, 6 ] ],
+    J: [ [ 6, 6, 6, 6 ], [ 12, 12, 2, 12 ], [ 12, 12, 2, 12 ], [ 12, 12, 2, 12 ], [ 2, 12, 2, 12 ], [ 12, 6, 12, 12 ] ],
+    L: [ [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 12, 12, 12 ], [ 2, 6, 6, 6 ] ],
+    M: [ [ 2, 12, 12, 2 ], [ 2, 0, 12, 2 ], [ 2, 12, 0, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ] ],
+    N: [ [ 2, 12, 12, 2 ], [ 2, 6, 12, 2 ], [ 2, 12, 6, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 6 ], [ 2, 12, 12, 2 ] ],
+    O: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ] ],
+    P: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
+    R: [ [ 12, 6, 6, 12 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ], [ 2, 2, 12, 12 ], [ 2, 12, 2, 2 ] ],
+    S: [ [ 12, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 6, 6, 12 ], [ 12, 12, 12, 2 ], [ 12, 12, 12, 2 ], [ 6, 6, 6, 12 ] ],
+    T: [ [ 6, 6, 6, 6 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ],
+    U: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 6, 6, 12 ] ],
+    V: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 6, 12, 12 ] ],
+    W: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 2, 0, 0, 2 ], [ 2, 12, 12, 2 ] ],
+    Y: [ [ 2, 12, 12, 2 ], [ 2, 12, 12, 2 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ], [ 12, 2, 12, 12 ] ]
+  };
+  function getClockStateForLetter(ch, rowInLetter, colInLetter) {
+    const glyph = letterPatterns[ch];
+    if (!glyph) return clockStates[12];
+    return clockStates[glyph[rowInLetter][colInLetter]];
+  }
+  const LETTER_W = 4;
+  const LETTER_H = 6;
+  const DIGIT_W = 3;
+  const DIGIT_H = 6;
   function createTimePattern(date) {
-    const timePosX = 1;
-    const timePosY = 1;
     const pattern = new Array(Cols * Rows);
-
     let hours = date.getHours();
     if (!is24Hour) {
       hours = hours % 12;
       if (hours === 0) hours = 12;
     }
     const minutes = date.getMinutes();
-
-    const hTens = Math.floor(hours / 10);
-    const hUnits = hours % 10;
-    const mTens = Math.floor(minutes / 10);
-    const mUnits = minutes % 10;
-
-    for (let row = 0; row < Rows; row++) {
-      for (let col = 0; col < Cols; col++) {
-        const localRow = row - timePosX;
-        const localCol = col - timePosY;
-        const idx = row * Cols + col;
-
-        if (localRow >= 0 && localCol >= 0 && localRow < 6 && localCol < 14) {
-          if (localCol < 3) {
-            pattern[idx] = getClockStateForNumber(hTens, localRow, localCol);
-          } else if (localCol < 6) {
-            pattern[idx] = getClockStateForNumber(hUnits, localRow, localCol - 3);
-          } else if (localCol < 8) {
-            if (localCol === 6) {
-              if (localRow === 1 || localRow === 3) pattern[idx] = clockStates[5];
-              else if (localRow === 2 || localRow === 4) pattern[idx] = clockStates[1];
-              else pattern[idx] = clockStates[12];
-            } else if (localCol === 7) {
-              if (localRow === 1 || localRow === 3) pattern[idx] = clockStates[8];
-              else if (localRow === 2 || localRow === 4) pattern[idx] = clockStates[3];
-              else pattern[idx] = clockStates[12];
-            }
-          } else if (localCol < 11) {
-            pattern[idx] = getClockStateForNumber(mTens, localRow, localCol - 8);
-          } else if (localCol < 14) {
-            pattern[idx] = getClockStateForNumber(mUnits, localRow, localCol - 11);
+    const seconds = date.getSeconds();
+    const COLON_W = 2;
+    const TOP_ROW = Math.floor((Rows - DIGIT_H) / 2);
+    const TOP_COL = 3;
+    const timeSlots = [ {
+      text: String(Math.floor(hours / 10)),
+      col0: TOP_COL + 0 * DIGIT_W
+    }, {
+      text: String(hours % 10),
+      col0: TOP_COL + 1 * DIGIT_W
+    }, {
+      text: ":",
+      col0: TOP_COL + 2 * DIGIT_W,
+      isColon: true
+    }, {
+      text: String(Math.floor(minutes / 10)),
+      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 0 * DIGIT_W
+    }, {
+      text: String(minutes % 10),
+      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 1 * DIGIT_W
+    }, {
+      text: ":",
+      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W,
+      isColon: true
+    }, {
+      text: String(Math.floor(seconds / 10)),
+      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W + COLON_W + 0 * DIGIT_W
+    }, {
+      text: String(seconds % 10),
+      col0: TOP_COL + 2 * DIGIT_W + COLON_W + 2 * DIGIT_W + COLON_W + 1 * DIGIT_W
+    } ];
+    for (let i = 0; i < pattern.length; i++) pattern[i] = clockStates[12];
+    function drawGlyph(slot) {
+      const str = slot.text;
+      if (slot.isColon) {
+        for (let r = 0; r < DIGIT_H; r++) {
+          for (let c = 0; c < COLON_W; c++) {
+            const rr = (slot.row0 || TOP_ROW) + r;
+            const cc = slot.col0 + c;
+            if (rr >= Rows || cc >= Cols) continue;
+            const idx = rr * Cols + cc;
+            if (r === 1 || r === 3) pattern[idx] = clockStates[5]; else if (r === 2 || r === 4) pattern[idx] = clockStates[1]; else pattern[idx] = clockStates[12];
           }
-        } else {
-          pattern[idx] = clockStates[12];
+        }
+        return;
+      }
+      const glyphW = slot.glyphW || DIGIT_W;
+      const glyphH = slot.isLetter ? LETTER_H : DIGIT_H;
+      const row0 = slot.row0 || TOP_ROW;
+      for (let k = 0; k < str.length; k++) {
+        const ch = str[k];
+        const charCol0 = slot.col0 + k * glyphW;
+        for (let r = 0; r < glyphH; r++) {
+          for (let c = 0; c < glyphW; c++) {
+            const rr = row0 + r;
+            const cc = charCol0 + c;
+            if (rr >= Rows || cc >= Cols) continue;
+            const idx = rr * Cols + cc;
+            if (/[0-9]/.test(ch)) {
+              pattern[idx] = getClockStateForNumber(parseInt(ch, 10), r, c);
+            } else if (/[A-Z]/.test(ch)) {
+              pattern[idx] = getClockStateForLetter(ch, r, c);
+            }
+          }
         }
       }
     }
+    for (const slot of timeSlots) drawGlyph(slot);
     return pattern;
   }
-
   class Clock {
     constructor() {
       this.angleA = 0;
       this.angleB = 0;
       this.animA = null;
       this.animB = null;
+      this.rippleAnim = null;
     }
-
     setTargets(targetA, targetB, durationSeconds, nowSec) {
       if (durationSeconds <= 0) {
         this.angleA = normalizeDeg(targetA);
@@ -521,7 +713,6 @@
         endSec: nowSec + durationSeconds
       };
     }
-
     update(nowSec) {
       if (this.animA) {
         const denom = this.animA.endSec - this.animA.startSec;
@@ -539,149 +730,252 @@
       }
     }
   }
-
   const clocks = [];
   function createClocks() {
     clocks.length = 0;
-    for (let i = 0; i < Cols * Rows; i++) clocks.push(new Clock());
+    for (let i = 0; i < Cols * Rows; i++) clocks.push(new Clock);
   }
-
   function getPatternAngles(row, col, rows, cols, quantize = false) {
-    const cx = (cols - 1) * 0.5;
-    const cy = (rows - 1) * 0.5;
-
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
     let dx = col - cx;
     let dy = row - cy;
-
     const aspect = rows / cols;
     dx *= aspect;
-
     const maxDx = cx * aspect;
     const maxDy = cy;
     const maxR = Math.sqrt(maxDx * maxDx + maxDy * maxDy);
     const r = Math.sqrt(dx * dx + dy * dy);
-    const rn = maxR <= 1e-6 ? 0 : (r / maxR);
-
+    const rn = maxR <= 1e-6 ? 0 : r / maxR;
     let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
     radialDeg = normalizeDeg(radialDeg + 90);
-
     const tangentDeg = normalizeDeg(radialDeg + 90);
-
     const spreadCenter = 55;
     const spreadOuter = 10;
     const spread = lerp(spreadCenter, spreadOuter, smoothStep(rn));
-
     let a = normalizeDeg(tangentDeg - spread);
     let b = normalizeDeg(tangentDeg + spread);
-
     if (quantize) {
       const step = 15;
       a = normalizeDeg(Math.round(a / step) * step);
       b = normalizeDeg(Math.round(b / step) * step);
     }
-    return [a, b];
+    return [ a, b ];
   }
-
-  function getPatternAnglesCircleOpen(row, col, rows, cols, cxRatio = 0.5, cyRatio = 0.5, spreadCenter = 20) {
+  function getPatternAnglesCircleOpen(row, col, rows, cols, cxRatio = .5, cyRatio = .5, spreadCenter = 20) {
     const cx = (cols - 1) * cxRatio;
     const cy = (rows - 1) * cyRatio;
-
     const dx = col - cx;
     const dy = row - cy;
-
     const maxDx = cx * 2;
     const maxDy = cy * 2;
     const maxR = Math.sqrt(maxDx * maxDx + maxDy * maxDy);
     const r = Math.sqrt(dx * dx + dy * dy);
-    const rn = maxR <= 1e-6 ? 0 : (r / maxR);
+    const rn = maxR <= 1e-6 ? 0 : r / maxR;
     const rnInv = 1 - rn;
-
     const spreadOuter = 1;
     const spread = lerp(spreadOuter, spreadCenter, Math.pow(rnInv, 4));
-
     let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
     radialDeg = normalizeDeg(radialDeg + 90);
-
     const tangentDeg = normalizeDeg(radialDeg + 90);
-
     const a = normalizeDeg(tangentDeg + spread);
     const b = normalizeDeg(tangentDeg + 180 - spread);
-    return [a, b];
+    return [ a, b ];
   }
-
-  function getPatternVector(row, col, rows, cols, cxRatio = 0.5, cyRatio = 0.5) {
+  function getPatternVector(row, col, rows, cols, cxRatio = .5, cyRatio = .5) {
     const cx = (cols - 1) * cxRatio;
     const cy = (rows - 1) * cyRatio;
-
     const dx = col - cx;
     const dy = row - cy;
-
     let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
     radialDeg = normalizeDeg(radialDeg + 90);
-
     const a = normalizeDeg(radialDeg);
     const b = normalizeDeg(radialDeg + 180);
-    return [a, b];
+    return [ a, b ];
   }
-
-  function getPatternVectorTangent(row, col, rows, cols, cxRatio = 0.5, cyRatio = 0.5) {
+  function getPatternVectorTangent(row, col, rows, cols, cxRatio = .5, cyRatio = .5) {
     const cx = (cols - 1) * cxRatio;
     const cy = (rows - 1) * cyRatio;
-
     const dx = col - cx;
     const dy = row - cy;
-
     let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
     radialDeg = normalizeDeg(radialDeg + 90);
-
     const a = normalizeDeg(radialDeg);
     const b = normalizeDeg(radialDeg + 180);
-    return [a, b];
+    return [ a, b ];
   }
-
+  function getPatternSpiral(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    radialDeg = normalizeDeg(radialDeg + 90);
+    const tangentDeg = normalizeDeg(radialDeg + 90);
+    const maxR = Math.sqrt(cx * cx + cy * cy);
+    const r = Math.sqrt(dx * dx + dy * dy);
+    const rn = maxR <= 1e-6 ? 0 : r / maxR;
+    const spread = lerp(45, 15, smoothStep(rn));
+    return [ normalizeDeg(tangentDeg - spread), normalizeDeg(tangentDeg + spread) ];
+  }
+  function getPatternRings(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    radialDeg = normalizeDeg(radialDeg + 90);
+    const tangentDeg = normalizeDeg(radialDeg + 90);
+    return [ tangentDeg, tangentDeg ];
+  }
+  function getPatternDiagonal() {
+    return [ 45, 225 ];
+  }
+  function getPatternSine(row, col, rows, cols) {
+    const t = Math.sin(col * (Math.PI * 2 / cols)) * 80;
+    return [ normalizeDeg(t), normalizeDeg(t + 180) ];
+  }
+  function getPatternPinwheel(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    radialDeg = normalizeDeg(radialDeg + 90);
+    return [ normalizeDeg(radialDeg), normalizeDeg(radialDeg + 180) ];
+  }
+  function getPatternSquareRings(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    const ax = Math.abs(dx);
+    const ay = Math.abs(dy);
+    if (ax >= ay) {
+      return [ 90, 270 ];
+    } else {
+      return [ 0, 180 ];
+    }
+  }
+  function getPatternBurst(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    radialDeg = normalizeDeg(radialDeg + 90);
+    return [ radialDeg, radialDeg ];
+  }
+  function getPatternFigure8(row, col, rows, cols) {
+    const cx = (cols - 1) * .5;
+    const cy = (rows - 1) * .5;
+    const dx = col - cx;
+    const dy = row - cy;
+    let radialDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    radialDeg = normalizeDeg(radialDeg + 90);
+    const sign = dx * dy >= 0 ? 1 : -1;
+    const a = normalizeDeg(radialDeg * sign);
+    const b = normalizeDeg((radialDeg + 180) * sign);
+    return [ a, b ];
+  }
+  function getPatternCrosshatch(row, col, rows, cols) {
+    const isEvenRow = row % 2 === 0;
+    const phase = col / Math.max(1, cols - 1) * 360;
+    const sweep = isEvenRow ? phase : 360 - phase;
+    const a = normalizeDeg(sweep);
+    const b = normalizeDeg(sweep + 180);
+    return [ a, b ];
+  }
+  const RIPPLE_SPEED_CELLS_PER_SEC = 22;
+  const RIPPLE_AMPLITUDE_DEG = 90;
+  const RIPPLE_DURATION = .6;
+  const activeRipples = [];
+  function spawnRipple(fromCol, fromRow, nowSec) {
+    activeRipples.push({
+      cx: fromCol,
+      cy: fromRow,
+      startSec: nowSec
+    });
+    if (activeRipples.length > 16) activeRipples.shift();
+  }
+  function computeRippleOffset(col, row, nowSec) {
+    if (activeRipples.length === 0) return 0;
+    let total = 0;
+    let anyActive = false;
+    for (let i = 0; i < activeRipples.length; i++) {
+      const ripple = activeRipples[i];
+      const dx = col - ripple.cx;
+      const dy = row - ripple.cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const arrival = ripple.startSec + dist / RIPPLE_SPEED_CELLS_PER_SEC;
+      if (nowSec < arrival) continue;
+      const localT = nowSec - arrival;
+      if (localT > RIPPLE_DURATION) continue;
+      anyActive = true;
+      const attack = .08;
+      let env;
+      if (localT < attack) {
+        env = localT / attack;
+      } else {
+        const rem = (localT - attack) / (RIPPLE_DURATION - attack);
+        env = 1 - rem;
+      }
+      const envSm = env < 0 ? 0 : env > 1 ? 1 : env * env * (3 - 2 * env);
+      const ring = Math.round(dist);
+      const sign = ring % 2 === 0 ? 1 : -1;
+      total += sign * RIPPLE_AMPLITUDE_DEG * envSm;
+    }
+    return anyActive ? total : 0;
+  }
+  function pruneRipples(nowSec) {
+    const maxLife = 6;
+    for (let i = activeRipples.length - 1; i >= 0; i--) {
+      if (nowSec - activeRipples[i].startSec > maxLife) {
+        activeRipples.splice(i, 1);
+      }
+    }
+  }
   class VortexField {
-    constructor(cfg) { this.cfg = cfg; }
-
+    constructor(cfg) {
+      this.cfg = cfg;
+    }
     vField(x, y) {
       let u = 0, v = 0;
       const eps = this.cfg.Eps;
-
       for (const vt of this.cfg.Vortices) {
         const dx = x - vt.Cx;
         const dy = y - vt.Cy;
         const r2 = dx * dx + dy * dy + eps;
         u += -vt.Strength * dy / r2;
-        v +=  vt.Strength * dx / r2;
+        v += vt.Strength * dx / r2;
       }
-
       u += this.cfg.BackgroundU + this.cfg.WaveUCosAmp * Math.cos(2 * Math.PI * y);
       v += this.cfg.WaveVSinAmp * Math.sin(2 * Math.PI * x);
-
-      return { u, v };
-    }
-
-    rk4Step(p, h) {
-      const k1 = this.vField(p.x, p.y);
-      const k2 = this.vField(p.x + 0.5 * h * k1.u, p.y + 0.5 * h * k1.v);
-      const k3 = this.vField(p.x + 0.5 * h * k2.u, p.y + 0.5 * h * k2.v);
-      const k4 = this.vField(p.x + h * k3.u, p.y + h * k3.v);
-
       return {
-        x: p.x + (h / 6) * (k1.u + 2 * k2.u + 2 * k3.u + k4.u),
-        y: p.y + (h / 6) * (k1.v + 2 * k2.v + 2 * k3.v + k4.v)
+        u: u,
+        v: v
       };
     }
-
+    rk4Step(p, h) {
+      const k1 = this.vField(p.x, p.y);
+      const k2 = this.vField(p.x + .5 * h * k1.u, p.y + .5 * h * k1.v);
+      const k3 = this.vField(p.x + .5 * h * k2.u, p.y + .5 * h * k2.v);
+      const k4 = this.vField(p.x + h * k3.u, p.y + h * k3.v);
+      return {
+        x: p.x + h / 6 * (k1.u + 2 * k2.u + 2 * k3.u + k4.u),
+        y: p.y + h / 6 * (k1.v + 2 * k2.v + 2 * k3.v + k4.v)
+      };
+    }
     cellCenterToField(x, y, cols, rows) {
-      const fx = (x + 0.5) / cols;
-      const fy = (y + 0.5) / rows;
-
+      const fx = (x + .5) / cols;
+      const fy = (y + .5) / rows;
       const X = lerp(this.cfg.XMin, this.cfg.XMax, fx);
       const Y = lerp(this.cfg.YMax, this.cfg.YMin, fy);
-
-      return { x: X, y: Y };
+      return {
+        x: X,
+        y: Y
+      };
     }
-
     degreesFromVectorUp0CW(vx, vy) {
       let r = Math.atan2(vx, -vy);
       let deg = r * 180 / Math.PI;
@@ -689,363 +983,330 @@
       if (deg < 0) deg += 360;
       return deg;
     }
-
     getAngleDegrees(x, y, cols, rows) {
       const pField = this.cellCenterToField(x, y, cols, rows);
-
-      let p2 = { ...pField };
+      let p2 = {
+        ...pField
+      };
       const steps = Math.max(1, this.cfg.Steps | 0);
       for (let i = 0; i < steps; i++) p2 = this.rk4Step(p2, this.cfg.StepSize);
-
       let dfx = p2.x - pField.x;
       let dfy = p2.y - pField.y;
-
-      if ((dfx * dfx + dfy * dfy) < 1e-12) {
+      if (dfx * dfx + dfy * dfy < 1e-12) {
         const inst = this.vField(pField.x, pField.y);
         dfx = inst.u;
         dfy = inst.v;
       }
-
       const dsx = dfx;
       const dsy = -dfy;
-
       return this.degreesFromVectorUp0CW(dsx, dsy);
     }
   }
-
   let currentTimePattern = new Array(Cols * Rows).fill(clockStates[12]);
   let nextPatternSwitchSec = 0;
-
   function applyPattern(pIndex, nowSec) {
     let idx = 0;
-
     for (let row = 0; row < Rows; row++) {
       for (let col = 0; col < Cols; col++) {
         let aDeg = 0, bDeg = 90;
-
         if (pIndex === 0) {
           [aDeg, bDeg] = getPatternVector(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 1) {
-          [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, 0.5, 0.5, 0);
+        } else if (pIndex === 1) {
+          [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, .5, .5, 0);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 2) {
+        } else if (pIndex === 2) {
           [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 3) {
-          [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, 0.5, 0.5, 110);
+        } else if (pIndex === 3) {
+          [aDeg, bDeg] = getPatternAnglesCircleOpen(row, col, Rows, Cols, .5, .5, 110);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 4) {
-          currentTimePattern = createTimePattern(new Date());
+        } else if (pIndex === 4) {
+          currentTimePattern = createTimePattern(new Date);
           const st = currentTimePattern[idx];
           aDeg = st.a;
           bDeg = st.b;
           PatternPeriodSeconds = TransitionSeconds + 5;
-        }
-        else if (pIndex === 5) {
+        } else if (pIndex === 5) {
           const cfg = {
-            XMin: -1.0, XMax:  1.0,
-            YMin: -0.5, YMax:  0.5,
-            Vortices: [
-              { Cx: -1.0, Cy: 0.7, Strength:  1.5 },
-              { Cx:  0.6, Cy: 0.7, Strength: -1.5 },
-            ],
-            Eps: 1e-3,
-            BackgroundU: 0.20,
-            WaveUCosAmp: 0.06,
-            WaveVSinAmp: 0.06,
+            XMin: -1,
+            XMax: 1,
+            YMin: -.5,
+            YMax: .5,
+            Vortices: [ {
+              Cx: -1,
+              Cy: .7,
+              Strength: 1.5
+            }, {
+              Cx: .6,
+              Cy: .7,
+              Strength: -1.5
+            } ],
+            Eps: .001,
+            BackgroundU: .2,
+            WaveUCosAmp: .06,
+            WaveVSinAmp: .06,
             Steps: 1,
-            StepSize: 0.012
+            StepSize: .012
           };
           const field = new VortexField(cfg);
           const angle = field.getAngleDegrees(col, row, Cols, Rows);
           aDeg = angle;
           bDeg = normalizeDeg(angle + 180);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 6) {
+        } else if (pIndex === 6) {
           const cfg = {
-            XMin: -1.0, XMax:  1.0,
-            YMin: -0.5, YMax:  0.5,
-            Vortices: [
-              { Cx: -0.6, Cy: 0.7, Strength:  1.5 },
-              { Cx:  1.5, Cy: 0.7, Strength: -1.5 },
-            ],
-            Eps: 1e-3,
-            BackgroundU: 0.20,
-            WaveUCosAmp: 0.06,
-            WaveVSinAmp: 0.06,
+            XMin: -1,
+            XMax: 1,
+            YMin: -.5,
+            YMax: .5,
+            Vortices: [ {
+              Cx: -.6,
+              Cy: .7,
+              Strength: 1.5
+            }, {
+              Cx: 1.5,
+              Cy: .7,
+              Strength: -1.5
+            } ],
+            Eps: .001,
+            BackgroundU: .2,
+            WaveUCosAmp: .06,
+            WaveVSinAmp: .06,
             Steps: 1,
-            StepSize: 0.012
+            StepSize: .012
           };
           const field = new VortexField(cfg);
           const angle = field.getAngleDegrees(col, row, Cols, Rows);
           aDeg = angle;
           bDeg = normalizeDeg(angle + 180);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 7) {
+        } else if (pIndex === 7) {
           aDeg = col * 10;
           bDeg = normalizeDeg(aDeg + 180);
           PatternPeriodSeconds = TransitionSeconds;
-        }
-        else if (pIndex === 8) {
-          const layer = Math.min(
-            row,
-            col,
-            Rows - 1 - row,
-            Cols - 1 - col
-          );
-
-          const isTopLeft     = (row === layer && col === layer);
-          const isTopRight    = (row === layer && col === Cols - 1 - layer);
-          const isBottomLeft  = (row === Rows - 1 - layer && col === layer);
-          const isBottomRight = (row === Rows - 1 - layer && col === Cols - 1 - layer);
-
+        } else if (pIndex === 8) {
+          const layer = Math.min(row, col, Rows - 1 - row, Cols - 1 - col);
+          const isTopLeft = row === layer && col === layer;
+          const isTopRight = row === layer && col === Cols - 1 - layer;
+          const isBottomLeft = row === Rows - 1 - layer && col === layer;
+          const isBottomRight = row === Rows - 1 - layer && col === Cols - 1 - layer;
           if (isTopLeft) {
             aDeg = 90;
             bDeg = 180;
-          }
-          else if (isTopRight) {
+          } else if (isTopRight) {
             aDeg = 180;
             bDeg = 270;
-          }
-          else if (isBottomLeft) {
+          } else if (isBottomLeft) {
             aDeg = 0;
             bDeg = 90;
-          }
-          else if (isBottomRight) {
+          } else if (isBottomRight) {
             aDeg = 0;
             bDeg = 270;
-          }
-          else if (row === layer || row === Rows - 1 - layer) {
+          } else if (row === layer || row === Rows - 1 - layer) {
             aDeg = 90;
             bDeg = 270;
-          }
-          else if (col === layer || col === Cols - 1 - layer) {
+          } else if (col === layer || col === Cols - 1 - layer) {
             aDeg = 0;
             bDeg = 180;
-          }
-          else {
+          } else {
             aDeg = 0;
             bDeg = 90;
           }
-
-          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
-        }
-        else if (pIndex === 9) {
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 9) {
           const halfRows = Rows / 2;
           const halfCols = Cols / 2;
-
           const qRow = Math.floor(row / halfRows);
           const qCol = Math.floor(col / halfCols);
           const lRow = row % halfRows;
           const lCol = col % halfCols;
-
-          const onOuterTop    = lRow === 0;
+          const onOuterTop = lRow === 0;
           const onOuterBottom = lRow === halfRows - 1;
-          const onOuterLeft   = lCol === 0;
-          const onOuterRight  = lCol === halfCols - 1;
-
+          const onOuterLeft = lCol === 0;
+          const onOuterRight = lCol === halfCols - 1;
           const innerMargin = 1;
-          const onInnerTop    = lRow === innerMargin;
+          const onInnerTop = lRow === innerMargin;
           const onInnerBottom = lRow === halfRows - 1 - innerMargin;
-          const onInnerLeft   = lCol === innerMargin;
-          const onInnerRight  = lCol === halfCols - 1 - innerMargin;
-
-          const isOuterTopLeft     = onOuterTop && onOuterLeft;
-          const isOuterTopRight    = onOuterTop && onOuterRight;
-          const isOuterBottomLeft  = onOuterBottom && onOuterLeft;
+          const onInnerLeft = lCol === innerMargin;
+          const onInnerRight = lCol === halfCols - 1 - innerMargin;
+          const isOuterTopLeft = onOuterTop && onOuterLeft;
+          const isOuterTopRight = onOuterTop && onOuterRight;
+          const isOuterBottomLeft = onOuterBottom && onOuterLeft;
           const isOuterBottomRight = onOuterBottom && onOuterRight;
-
-          const isInnerTopLeft     = onInnerTop && onInnerLeft;
-          const isInnerTopRight    = onInnerTop && onInnerRight;
-          const isInnerBottomLeft  = onInnerBottom && onInnerLeft;
+          const isInnerTopLeft = onInnerTop && onInnerLeft;
+          const isInnerTopRight = onInnerTop && onInnerRight;
+          const isInnerBottomLeft = onInnerBottom && onInnerLeft;
           const isInnerBottomRight = onInnerBottom && onInnerRight;
-
           function setCornerAngles(isTL, isTR, isBL, isBR) {
             if (isTL) {
               aDeg = 90;
               bDeg = 180;
-            }
-            else if (isTR) {
+            } else if (isTR) {
               aDeg = 180;
               bDeg = 270;
-            }
-            else if (isBL) {
+            } else if (isBL) {
               aDeg = 0;
               bDeg = 90;
-            }
-            else if (isBR) {
+            } else if (isBR) {
               aDeg = 0;
               bDeg = 270;
             }
           }
-
           if (isOuterTopLeft || isOuterTopRight || isOuterBottomLeft || isOuterBottomRight) {
             setCornerAngles(isOuterTopLeft, isOuterTopRight, isOuterBottomLeft, isOuterBottomRight);
-          }
-          else if (onOuterTop || onOuterBottom) {
+          } else if (onOuterTop || onOuterBottom) {
             aDeg = 90;
             bDeg = 270;
-          }
-          else if (onOuterLeft || onOuterRight) {
+          } else if (onOuterLeft || onOuterRight) {
             aDeg = 0;
             bDeg = 180;
-          }
-          else if (isInnerTopLeft || isInnerTopRight || isInnerBottomLeft || isInnerBottomRight) {
+          } else if (isInnerTopLeft || isInnerTopRight || isInnerBottomLeft || isInnerBottomRight) {
             setCornerAngles(isInnerTopLeft, isInnerTopRight, isInnerBottomLeft, isInnerBottomRight);
-          }
-          else if (onInnerTop || onInnerBottom) {
+          } else if (onInnerTop || onInnerBottom) {
             aDeg = 90;
             bDeg = 270;
-          }
-          else if (onInnerLeft || onInnerRight) {
+          } else if (onInnerLeft || onInnerRight) {
             aDeg = 0;
             bDeg = 180;
-          }
-          else {
+          } else {
             aDeg = 0;
             bDeg = 0;
           }
-
-          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
-        }
-        else if (pIndex === 10) {
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 10) {
           const localRow = row % 2;
           const localCol = col % 2;
-
           if (localRow === 0 && localCol === 0) {
             aDeg = 90;
             bDeg = 180;
-          }
-          else if (localRow === 0 && localCol === 1) {
+          } else if (localRow === 0 && localCol === 1) {
             aDeg = 180;
             bDeg = 270;
-          }
-          else if (localRow === 1 && localCol === 0) {
+          } else if (localRow === 1 && localCol === 0) {
             aDeg = 0;
             bDeg = 90;
-          }
-          else if (localRow === 1 && localCol === 1) {
+          } else if (localRow === 1 && localCol === 1) {
             aDeg = 0;
             bDeg = 270;
           }
-
-          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
-        }
-        else if (pIndex === 11) {
-          if ((row % 2) === (col % 2)) {
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 11) {
+          if (row % 2 === col % 2) {
             aDeg = 135;
             bDeg = 315;
           } else {
             aDeg = 45;
             bDeg = 225;
           }
-          PatternPeriodSeconds = Math.max(TransitionSeconds, 2.0);
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 12) {
+          [aDeg, bDeg] = getPatternSpiral(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 13) {
+          [aDeg, bDeg] = getPatternRings(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 14) {
+          [aDeg, bDeg] = getPatternDiagonal();
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 15) {
+          [aDeg, bDeg] = getPatternSine(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 16) {
+          [aDeg, bDeg] = getPatternPinwheel(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 17) {
+          [aDeg, bDeg] = getPatternSquareRings(row, col, Rows, Cols);
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
+        } else if (pIndex === 18) {
+          [aDeg, bDeg] = getPatternBurst(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 19) {
+          [aDeg, bDeg] = getPatternFigure8(row, col, Rows, Cols);
+          PatternPeriodSeconds = TransitionSeconds;
+        } else if (pIndex === 21) {
+          [aDeg, bDeg] = getPatternCrosshatch(row, col, Rows, Cols);
+          PatternPeriodSeconds = Math.max(TransitionSeconds, 2);
         }
-
         clocks[idx].setTargets(aDeg, bDeg, TransitionSeconds, nowSec);
         idx++;
       }
     }
   }
-
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d');
-
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
   let cellSize = 50;
   let radius, lenA, lenB, thickA, thickB, hubR, pad;
-  const clockFaceCanvas = document.createElement('canvas');
-  const clockFaceCtx = clockFaceCanvas.getContext('2d');
+  const clockFaceCanvas = document.createElement("canvas");
+  const clockFaceCtx = clockFaceCanvas.getContext("2d");
   let isAnimating = true;
   let mouseFollowActive = false;
   let lastPatternIndexBeforeMouse = 3;
-  let mouseCanvasX = -1000;
-  let mouseCanvasY = -1000;
-
+  let mouseCanvasX = -1e3;
+  let mouseCanvasY = -1e3;
   function rgba(c) {
     return `rgba(${c.r},${c.g},${c.b},${c.a})`;
   }
-
   function resize() {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const PANEL_H = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top-panel-height')) || 36;
-    const DOCK_W  = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-width')) || 68;
-
-    const maxW = (window.innerWidth - DOCK_W) * 0.92;
-    const maxH = (window.innerHeight - PANEL_H) * 0.92;
-
+    const DOCK_W = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--dock-width")) || 40;
+    const maxW = (window.innerWidth - DOCK_W) * .94;
+    const maxH = window.innerHeight * .92;
     cellSize = Math.floor(Math.min(maxW / Cols, maxH / Rows));
-
-    pad = cellSize * 0.03;
+    pad = cellSize * .03;
     const cssW = Math.floor(cellSize * Cols + pad);
     const cssH = Math.floor(cellSize * Rows + pad);
-
     canvas.style.width = cssW + "px";
     canvas.style.height = cssH + "px";
-
     const bufW = Math.floor(cssW * dpr);
     const bufH = Math.floor(cssH * dpr);
-
-    canvas.addEventListener('mousemove', e => {
+    canvas.addEventListener("mousemove", e => {
       const rect = canvas.getBoundingClientRect();
       mouseCanvasX = e.clientX - rect.left;
       mouseCanvasY = e.clientY - rect.top;
     });
-
     if (canvas.width === bufW && canvas.height === bufH) return;
-
     canvas.width = bufW;
     canvas.height = bufH;
-
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    pad = cellSize * 0.03;
-
-    const diameter = cellSize * 0.98;
+    pad = cellSize * .03;
+    const diameter = cellSize * .98;
     radius = diameter / 2;
-
-    lenA = radius * 0.95;
-    lenB = radius * 0.85;
-    thickA = Math.max(2, radius * 0.1);
+    lenA = radius * .95;
+    lenB = radius * .85;
+    thickA = Math.max(2, radius * .1);
     thickB = thickA;
     hubR = thickA / 2;
-
     clockFaceCanvas.width = Math.ceil(diameter * dpr);
     clockFaceCanvas.height = Math.ceil(diameter * dpr);
     clockFaceCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     clockFaceCtx.clearRect(0, 0, diameter, diameter);
     drawClockFace(radius, radius, radius, clockFaceCtx);
-
     isAnimating = true;
   }
-
   function rerenderClockFace() {
     clockFaceCtx.clearRect(0, 0, clockFaceCanvas.width, clockFaceCanvas.height);
     drawClockFace(radius, radius, radius, clockFaceCtx);
   }
-
   function drawClockFace(cx, cy, r, targetCtx = ctx) {
-    const gx = cx + r * 0.25;
-    const gy = cy + r * 0.25;
-    const grad = targetCtx.createRadialGradient(gx, gy, r * 0.6, cx, cy, r);
-    faceColor = { r: backColor.r - 10, g: backColor.g - 10, b: backColor.b - 10, a: 1.0 };
+    const gx = cx + r * .25;
+    const gy = cy + r * .25;
+    const grad = targetCtx.createRadialGradient(gx, gy, r * .6, cx, cy, r);
+    faceColor = {
+      r: backColor.r - 10,
+      g: backColor.g - 10,
+      b: backColor.b - 10,
+      a: 1
+    };
     grad.addColorStop(0, rgba(faceColor));
-    grad.addColorStop(0.7, rgba(faceColor));
+    grad.addColorStop(.7, rgba(faceColor));
     grad.addColorStop(1, rgba(shadowColor));
-
     targetCtx.beginPath();
     targetCtx.arc(cx, cy, r, 0, Math.PI * 2);
     targetCtx.closePath();
     targetCtx.fillStyle = grad;
     targetCtx.fill();
   }
-
   function roundedRectPath(x, y, w, h, r) {
     r = Math.min(r, Math.min(w, h) / 2);
     ctx.beginPath();
@@ -1056,96 +1317,87 @@
     ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
   }
-
   function drawHand(cx, cy, angleDeg, length, thickness, shadowOffsetPx, shadowBlurPx) {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(angleDeg * Math.PI / 180);
-
     const x = -thickness / 2;
     const y = -length;
     const w = thickness;
     const h = length;
-    const corner = Math.min(thickness * 0.3, length * 0.1);
-
+    const corner = Math.min(thickness * .3, length * .1);
     ctx.shadowColor = `rgba(0,0,0,${HAND_SHADOW_ALPHA})`;
     ctx.shadowBlur = shadowBlurPx;
     ctx.shadowOffsetX = shadowOffsetPx;
     ctx.shadowOffsetY = shadowOffsetPx;
-
     ctx.fillStyle = rgba(handColor);
     roundedRectPath(x, y, w, h, corner);
     ctx.fill();
-
-    ctx.shadowColor = 'transparent';
+    ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
-
     ctx.restore();
   }
-
   function draw(nowSec) {
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const w = canvas.width;
     const h = canvas.height;
-
+    void nowSec;
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
-
     const diameter = radius * 2;
     const offset = (cellSize - diameter) / 2;
-
     const shadowOffsetPx = HAND_SHADOW_OFFSET;
-    const shadowBlurPx   = HAND_SHADOW_BLUR;
-
+    const shadowBlurPx = HAND_SHADOW_BLUR;
     let idx = 0;
     for (let row = 0; row < Rows; row++) {
       for (let col = 0; col < Cols; col++) {
         const cx = pad + col * cellSize + cellSize / 2;
         const cy = pad + row * cellSize + cellSize / 2;
-
         ctx.drawImage(clockFaceCanvas, pad + col * cellSize + offset, pad + row * cellSize + offset, radius * 2, radius * 2);
-
         const c = clocks[idx];
-
-        drawHand(cx, cy, c.angleB, lenB, thickB, shadowOffsetPx*0.8, shadowBlurPx);
-        drawHand(cx, cy, c.angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
-
+        const rippleOffset = computeRippleOffset(col, row, nowSec);
+        const angleA = normalizeDeg(c.angleA + rippleOffset);
+        const angleB = normalizeDeg(c.angleB + rippleOffset);
+        drawHand(cx, cy, angleB, lenB, thickB, shadowOffsetPx * .8, shadowBlurPx);
+        drawHand(cx, cy, angleA, lenA, thickA, shadowOffsetPx, shadowBlurPx);
         ctx.beginPath();
         ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
         ctx.closePath();
         ctx.fillStyle = rgba(handColor);
         ctx.fill();
-
         idx++;
       }
     }
   }
-
   function tick(tsMs) {
     requestAnimationFrame(tick);
-    const nowSec = tsMs / 1000;
-
+    const nowSec = tsMs / 1e3;
     if (colorTransition) {
       const t = clamp((nowSec - colorTransition.startSec) / colorTransition.duration, 0, 1);
       const eased = smoothStep(t);
       backColor = lerpColor(colorTransition.startBack, colorTransition.targetBack, eased);
       handColor = lerpColor(colorTransition.startHand, colorTransition.targetHand, eased);
       shadowColor = lerpColor(colorTransition.startShadow, colorTransition.targetShadow, eased);
-      document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+      document.getElementById("clock-container").style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
       rerenderClockFace();
       updateModalTheme();
       if (t >= 1) {
-        backColor = { ...colorTransition.targetBack };
-        handColor = { ...colorTransition.targetHand };
-        shadowColor = { ...colorTransition.targetShadow };
+        backColor = {
+          ...colorTransition.targetBack
+        };
+        handColor = {
+          ...colorTransition.targetHand
+        };
+        shadowColor = {
+          ...colorTransition.targetShadow
+        };
         colorTransition = null;
         rerenderClockFace();
         updateModalTheme();
       }
     }
-
     if (!mouseFollowActive) {
       if (nowSec >= nextPatternSwitchSec) {
         patternIndex = (patternIndex + 1) % totalPattern;
@@ -1165,7 +1417,6 @@
           const dy = mouseCanvasY - cy;
           let targetAngle = Math.atan2(dx, -dy) * 180 / Math.PI;
           targetAngle = normalizeDeg(targetAngle);
-
           const currentAngle = clocks[idx].angleA;
           const delta = shortestDeltaDeg(currentAngle, targetAngle);
           const newAngle = normalizeDeg(currentAngle + delta * MOUSE_FOLLOW_SMOOTHING);
@@ -1178,7 +1429,6 @@
       }
       isAnimating = true;
     }
-
     let anyMoving = false;
     if (isAnimating) {
       for (const c of clocks) {
@@ -1187,261 +1437,130 @@
       }
       isAnimating = anyMoving || mouseFollowActive;
     }
-
     if (nowSec - lastRenderSec < FRAME_INTERVAL) return;
     lastRenderSec = nowSec;
+    pruneRipples(nowSec);
     draw(nowSec);
   }
-
   function setupControls() {
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const transitionSlider = document.getElementById('transition-slider');
-    const transitionValue = document.getElementById('transition-value');
-    const colorSwatchesContainer = document.getElementById('color-swatches');
-    const customPickers = document.getElementById('custom-color-pickers');
-    const customBackgroundInput = document.getElementById('custom-background');
-    const customHandInput = document.getElementById('custom-hand');
-
-    const themes = [
-      { name: 'Black on White', hand: { r: 0, g: 0, b: 0, a: 1.0 }, back: { r: 255, g: 255, b: 255, a: 1.0 }, shadow: { r: 200, g: 200, b: 200, a: 0.61 } },
-      { name: 'White on Black', hand: { r: 255, g: 255, b: 255, a: 1.0 }, back: { r: 0, g: 0, b: 0, a: 1.0 }, shadow: { r: 50, g: 50, b: 50, a: 0.61 } },
-      { name: 'Navy', hand: { r: 255, g: 255, b: 255, a: 1.0 }, back: { r: 24, g: 34, b: 65, a: 1.0 }, shadow: { r: 10, g: 15, b: 20, a: 0.61 } },
-      { name: 'Forest', hand: { r: 230, g: 230, b: 230, a: 1.0 }, back: { r: 50, g: 61, b: 54, a: 1.0 }, shadow: { r: 20, g: 25, b: 22, a: 0.61 } },
-      { name: 'Sand', hand: { r: 70, g: 50, b: 30, a: 1.0 }, back: { r: 240, g: 225, b: 210, a: 1.0 }, shadow: { r: 180, g: 160, b: 140, a: 0.6 } },
-      { name: 'Gold', hand: { r: 50, g: 40, b: 0, a: 1.0 }, back: { r: 255, g: 215, b: 0, a: 1.0 }, shadow: { r: 200, g: 160, b: 0, a: 0.61 } },
-    ];
-
-    let customBack = { r: 255, g: 255, b: 255, a: 1.0 };
-    let customHand = { r: 0, g: 0, b: 0, a: 1.0 };
-    let activeThemeIndex = 3;
-    let isCustomActive = false;
-
-    try {
-      const saved = localStorage.getItem('clockTheme');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.isCustom) {
-          isCustomActive = true;
-          customBack = parsed.back;
-          customHand = parsed.hand;
-          backColor = { ...customBack };
-          handColor = { ...customHand };
-          shadowColor = deriveShadow(backColor);
-        } else if (parsed.index >= 0 && parsed.index < themes.length) {
-          activeThemeIndex = parsed.index;
-          const theme = themes[activeThemeIndex];
-          backColor = { ...theme.back };
-          handColor = { ...theme.hand };
-          shadowColor = { ...theme.shadow };
+    const settingsBtn = document.getElementById("settings-btn");
+    const settingsModal = document.getElementById("settings-modal");
+    const transitionSlider = document.getElementById("transition-slider");
+    const transitionValue = document.getElementById("transition-value");
+    const themePill = document.getElementById("theme-pill");
+    const hourFormatToggle = document.getElementById("hour-format-toggle");
+    const mouseFollowToggle = document.getElementById("mouse-follow-toggle");
+    const patternPrevBtn = document.getElementById("pattern-prev-btn");
+    const patternNextBtn = document.getElementById("pattern-next-btn");
+    const showTimeBtn = document.getElementById("show-time-btn");
+    const fullscreenBtn = document.getElementById("fullscreen-btn");
+    function colorsForTheme(name) {
+      if (name === "light") {
+        return {
+          back: {
+            r: 248,
+            g: 248,
+            b: 248,
+            a: 1
+          },
+          hand: {
+            r: 20,
+            g: 22,
+            b: 26,
+            a: 1
+          }
+        };
+      }
+      return {
+        back: {
+          r: 18,
+          g: 20,
+          b: 24,
+          a: 1
+        },
+        hand: {
+          r: 240,
+          g: 240,
+          b: 240,
+          a: 1
         }
-      }
-    } catch (e) {}
-
-    if (!isCustomActive && backColor.r === 255 && backColor.g === 255 && backColor.b === 255 && handColor.r === 0) {
-      const theme = themes[activeThemeIndex];
-      backColor = { ...theme.back };
-      handColor = { ...theme.hand };
-      shadowColor = { ...theme.shadow };
+      };
     }
-
-    function hexToRgb(hex) {
-      const r = parseInt(hex.slice(1,3), 16);
-      const g = parseInt(hex.slice(3,5), 16);
-      const b = parseInt(hex.slice(5,7), 16);
-      return { r, g, b, a: 1.0 };
-    }
-
-    function rgbToHex(r,g,b) {
-      return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
-    }
-
-    function applyColorsInstant() {
-      document.getElementById('clock-container').style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
-      rerenderClockFace();
-      updateModalTheme();
-      isAnimating = true;
-    }
-
-    themes.forEach((theme, index) => {
-      const container = document.createElement('div');
-      container.className = 'swatch-container';
-
-      const swatch = document.createElement('div');
-      swatch.className = 'color-swatch';
-      swatch.style.backgroundColor = `rgb(${theme.back.r}, ${theme.back.g}, ${theme.back.b})`;
-      swatch.style.borderColor = `rgb(${theme.hand.r}, ${theme.hand.g}, ${theme.hand.b})`;
-      swatch.title = theme.name;
-
-      const label = document.createElement('span');
-      label.className = 'swatch-label';
-      label.textContent = theme.name;
-
-      container.appendChild(swatch);
-      container.appendChild(label);
-
-      if (index === activeThemeIndex && !isCustomActive) {
-        swatch.classList.add('active');
-      }
-
-      swatch.addEventListener('click', () => {
-        activeThemeIndex = index;
-        isCustomActive = false;
-        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-        swatch.classList.add('active');
-        customPickers.style.display = 'none';
-
-        startColorTransition(theme.back, theme.hand, theme.shadow);
-
-        try {
-          localStorage.setItem('clockTheme', JSON.stringify({ index: activeThemeIndex, isCustom: false }));
-        } catch (e) {}
+    function setTheme(name) {
+      const root = document.documentElement;
+      if (name === "light") root.classList.add("theme-light"); else root.classList.remove("theme-light");
+      themePill.querySelectorAll("button").forEach(b => {
+        b.classList.toggle("active", b.dataset.theme === name);
       });
-
-      colorSwatchesContainer.appendChild(container);
-    });
-
-    const customContainer = document.createElement('div');
-    customContainer.className = 'swatch-container';
-
-    const customSwatch = document.createElement('div');
-    customSwatch.className = 'color-swatch';
-    customSwatch.style.background = 'linear-gradient(135deg, #ff0000, #00ff00, #0000ff, #ff0000)';
-    customSwatch.style.borderColor = '#888';
-    customSwatch.title = 'Custom';
-
-    const customLabel = document.createElement('span');
-    customLabel.className = 'swatch-label';
-    customLabel.textContent = 'Custom';
-
-    customContainer.appendChild(customSwatch);
-    customContainer.appendChild(customLabel);
-
-    if (isCustomActive) {
-      customSwatch.classList.add('active');
-      customPickers.style.display = 'block';
-      customBackgroundInput.value = rgbToHex(customBack.r, customBack.g, customBack.b);
-      customHandInput.value = rgbToHex(customHand.r, customHand.g, customHand.b);
-    }
-
-    customSwatch.addEventListener('click', () => {
-      isCustomActive = true;
-      activeThemeIndex = -1;
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-      customSwatch.classList.add('active');
-      customPickers.style.display = 'block';
-
-      customBackgroundInput.value = rgbToHex(backColor.r, backColor.g, backColor.b);
-      customHandInput.value = rgbToHex(handColor.r, handColor.g, handColor.b);
-
+      const c = colorsForTheme(name);
+      const newBack = c.back;
+      const newHand = c.hand;
+      const newShadow = deriveShadow(newBack);
+      if (typeof backColor !== "undefined" && backColor && backColor.r !== undefined) {
+        startColorTransition(newBack, newHand, newShadow);
+      } else {
+        backColor = {
+          ...newBack
+        };
+        handColor = {
+          ...newHand
+        };
+        shadowColor = {
+          ...newShadow
+        };
+      }
       try {
-        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
+        localStorage.setItem("clockThemeMode", name);
       } catch (e) {}
+    }
+    themePill.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", () => setTheme(b.dataset.theme));
     });
-
-    colorSwatchesContainer.appendChild(customContainer);
-
-    customBackgroundInput.addEventListener('input', (e) => {
-      if (!isCustomActive) return;
-      const rgb = hexToRgb(e.target.value);
-      startColorTransition(rgb, handColor, deriveShadow(rgb));
-      customSwatch.style.background = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-      try {
-        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
-      } catch (err) {}
-    });
-
-    customHandInput.addEventListener('input', (e) => {
-      if (!isCustomActive) return;
-      const rgb = hexToRgb(e.target.value);
-      startColorTransition(backColor, rgb, shadowColor);
-      customSwatch.style.borderColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
-      try {
-        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: backColor, hand: handColor }));
-      } catch (err) {}
-    });
-
-    const hourFormatSetting = document.createElement('div');
-    hourFormatSetting.className = 'setting setting-checkbox';
-    hourFormatSetting.innerHTML = `
-      <label for="hour-format-toggle">24‑hour format</label>
-      <input type="checkbox" id="hour-format-toggle" ${is24Hour ? 'checked' : ''}>
-    `;
-    const themeSetting = document.querySelector('#settings-modal .setting');
-    themeSetting.after(hourFormatSetting);
-
-    document.getElementById('hour-format-toggle').addEventListener('change', (e) => {
+    hourFormatToggle.addEventListener("change", e => {
       is24Hour = e.target.checked;
       if (patternIndex === 4) {
-        const nowSec = performance.now() / 1000;
+        const nowSec = performance.now() / 1e3;
         applyPattern(4, nowSec);
         isAnimating = true;
       }
     });
-
-    document.addEventListener('fullscreenchange', () => {
-      const controls = document.querySelector('.controls');
+    document.addEventListener("fullscreenchange", () => {
+      const controls = document.querySelector(".controls");
       if (document.fullscreenElement) {
-        controls.style.display = 'none';
-        settingsModal.style.display = 'none';
+        controls.style.display = "none";
+        settingsModal.style.display = "none";
       } else {
-        controls.style.display = 'flex';
+        controls.style.display = "flex";
       }
     });
-
-    settingsBtn.addEventListener('click', (e) => {
+    settingsBtn.addEventListener("click", e => {
       e.stopPropagation();
-      const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
-      settingsModal.style.display = isHidden ? 'block' : 'none';
+      const isHidden = settingsModal.style.display === "none" || !settingsModal.style.display;
+      settingsModal.style.display = isHidden ? "block" : "none";
     });
-
     transitionSlider.value = TransitionSeconds;
     transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
-    transitionSlider.addEventListener('input', () => {
+    transitionSlider.addEventListener("input", () => {
       TransitionSeconds = parseFloat(transitionSlider.value);
       transitionValue.textContent = `${TransitionSeconds.toFixed(1)}s`;
     });
-
-    applyColorsInstant();
-  }
-
-  window.addEventListener('keydown', e => {
-    if (e.code === 'Space') {
-      const nowSec = performance.now() / 1000;
-      patternIndex = 4;
+    function gotoPattern(idx) {
+      const nowSec = performance.now() / 1e3;
+      if (mouseFollowActive) {
+        mouseFollowActive = false;
+        mouseFollowToggle.checked = false;
+      }
+      patternIndex = (idx % totalPattern + totalPattern) % totalPattern;
       applyPattern(patternIndex, nowSec);
       nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
       isAnimating = true;
-      e.preventDefault();
     }
-    else if (e.code === 'KeyC') {
-      const nowSec = performance.now() / 1000;
-      if (!mouseFollowActive) {
-        patternIndex = (patternIndex + 1) % totalPattern;
-        applyPattern(patternIndex, nowSec);
-        nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
-        isAnimating = true;
-      }
-      e.preventDefault();
-    }
-    else if (e.code === 'KeyF') {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen?.();
-      } else {
-        document.exitFullscreen?.();
-      }
-    } 
-    else if (e.code === 'KeyH') {
-      const settingsModal = document.getElementById('settings-modal');
-      if (settingsModal) {
-        const isHidden = settingsModal.style.display === 'none' || !settingsModal.style.display;
-        settingsModal.style.display = isHidden ? 'block' : 'none';
-      }
-      e.preventDefault();
-    }
-    else if (e.code === 'KeyM') {
-      const nowSec = performance.now() / 1000;
-      if (!mouseFollowActive) {
+    patternNextBtn.addEventListener("click", () => gotoPattern(patternIndex + 1));
+    patternPrevBtn.addEventListener("click", () => gotoPattern(patternIndex - 1));
+    showTimeBtn.addEventListener("click", () => gotoPattern(4));
+    mouseFollowToggle.addEventListener("change", e => {
+      const nowSec = performance.now() / 1e3;
+      if (e.target.checked) {
         lastPatternIndexBeforeMouse = patternIndex;
         mouseFollowActive = true;
         isAnimating = true;
@@ -1451,59 +1570,74 @@
         nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
         isAnimating = true;
       }
-      e.preventDefault();
-    }
-    else if (e.code === 'KeyR') {
-      const randomColor = () => ({
-        r: Math.floor(Math.random() * 256),
-        g: Math.floor(Math.random() * 256),
-        b: Math.floor(Math.random() * 256),
-        a: 1.0
-      });
-      const newBack = randomColor();
-      const newHand = randomColor();
-      startColorTransition(newBack, newHand, deriveShadow(newBack));
-
-      const customSwatch = document.querySelector('.color-swatch[title="Custom"]');
-      if (customSwatch) {
-        customSwatch.style.background = `rgb(${newBack.r}, ${newBack.g}, ${newBack.b})`;
-        customSwatch.style.borderColor = `rgb(${newHand.r}, ${newHand.g}, ${newHand.b})`;
+    });
+    fullscreenBtn.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
       }
-      const customBgInput = document.getElementById('custom-background');
-      const customHandInput = document.getElementById('custom-hand');
-      if (customBgInput) customBgInput.value = rgbToHex(newBack.r, newBack.g, newBack.b);
-      if (customHandInput) customHandInput.value = rgbToHex(newHand.r, newHand.g, newHand.b);
-
-      isCustomActive = true;
-      activeThemeIndex = -1;
-      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-      if (customSwatch) customSwatch.classList.add('active');
-      const customPickers = document.getElementById('custom-color-pickers');
-      if (customPickers) customPickers.style.display = 'block';
-
-      try {
-        localStorage.setItem('clockTheme', JSON.stringify({ isCustom: true, back: newBack, hand: newHand }));
-      } catch (err) {}
-      e.preventDefault();
+    });
+    try {
+      const savedTheme = localStorage.getItem("clockThemeMode");
+      setTheme(savedTheme === "light" ? "light" : "dark");
+    } catch (e) {
+      setTheme("dark");
     }
+    isAnimating = true;
+  }
+  window.addEventListener("resize", resize);
+  document.getElementById("clock-container").addEventListener("click", e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+    const col = Math.floor((x - pad) / cellSize);
+    const row = Math.floor((y - pad) / cellSize);
+    if (col < 0 || col >= Cols || row < 0 || row >= Rows) return;
+    const nowSec = performance.now() / 1e3;
+    spawnRipple(col, row, nowSec);
   });
-
-  window.addEventListener('resize', resize);
-
   createClocks();
   resize();
-  
-  document.getElementById('clock-container').style.backgroundColor = '#ffffff';
-
-  const nowSec = performance.now() / 1000;
+  backColor = {
+    r: 18,
+    g: 20,
+    b: 24,
+    a: 1
+  };
+  handColor = {
+    r: 240,
+    g: 240,
+    b: 240,
+    a: 1
+  };
+  shadowColor = deriveShadow(backColor);
+  document.getElementById("clock-container").style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
+  const nowSec = performance.now() / 1e3;
   patternIndex = 4;
   applyPattern(patternIndex, nowSec);
   nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
   isAnimating = true;
   lastRenderSec = 0;
-
   requestAnimationFrame(tick);
   setupControls();
+  setInterval(() => {
+    if (patternIndex === 4) {
+      const nowSec = performance.now() / 1e3;
+      const d = new Date;
+      const sig = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+      if (sig !== _lastTimeSig) {
+        _lastTimeSig = sig;
+        const prevDur = TransitionSeconds;
+        TransitionSeconds = .4;
+        applyPattern(4, nowSec);
+        TransitionSeconds = prevDur;
+        isAnimating = true;
+      }
+    }
+  }, 250);
+  let _lastTimeSig = -1;
 })();
 </script>
 </body>
