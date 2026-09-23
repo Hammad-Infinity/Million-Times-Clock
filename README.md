@@ -85,4 +85,5 @@ The clock uses a 16x8 grid system to represent time digits:
 - Adjust transition speed based on preference
 - Works great as desktop background preview or as wallpaper
 
-**Built with Canvas API & Vanilla JavaScript**
+## License 
+- The gem is available as open source under the terms of the [![License: MIT](https://shields.io)](https://opensource.org).
