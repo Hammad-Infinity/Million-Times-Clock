@@ -86,4 +86,4 @@ The clock uses a 16x8 grid system to represent time digits:
 - Works great as desktop background preview or as wallpaper
 
 ## License 
-- The gem is available as open source under the terms of the [![License: MIT](https://shields.io)](https://opensource.org).
+- The gem GNU Affero General Public License (AGPL).
