@@ -1,6 +1,7 @@
 #  Artistic Clock Visualizations
 
 A beautiful, interactive HTML-based clock display with animated hand and digit representations.
+Watch Demo here [Demo](http://hammad-infinity.github.io/Million-Times-Clock/)
 
 ## Features
 
