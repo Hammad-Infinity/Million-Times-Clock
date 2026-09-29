@@ -4,8 +4,8 @@ A generative clock art piece: a grid of hundreds of tiny analog clocks, each one
 individually posed so that together they spell out the current time.
 
 <video controls muted loop playsinline width="720">
-  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.webm" type="video/webm">
-  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.mp4"  type="video/mp4">
+  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/master/docs/demo.webm" type="video/webm">
+  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/master/docs/demo.mp4"  type="video/mp4">
 </video>
 <picture>
   <source srcset="docs/preview.avif" type="image/avif">
@@ -110,21 +110,21 @@ angle offsets applied at draw time.
 
 ## Getting started
 
-No build step. Just open `Million_Times_Clock.html` in a browser.
+No build step. Just open `index.html` in a browser.
 
 ```bash
 git clone https://github.com/Hammad-Infinity/Million-Times-Clock.git
 cd Million-Times-Clock
-open Million_Times_Clock.html   # macOS
-# or: xdg-open Million_Times_Clock.html   # Linux
-# or: start Million_Times_Clock.html      # Windows
+open index.html   # macOS
+# or: xdg-open index.html   # Linux
+# or: start index.html      # Windows
 ```
 
 Or serve it locally if you prefer:
 
 ```bash
 python3 -m http.server 8000
-# then visit http://localhost:8000/Million_Times_Clock.html
+# then visit http://localhost:8000/index.html
 ```
 
 ---
@@ -162,7 +162,7 @@ Tested on current Chrome, Firefox, Safari, and Edge.
 ## Project structure
 
 ```
-Million_Times_Clock.html   Single-file app: styles, markup, and script
+index.html   Single-file app: styles, markup, and script
 README.md                  This file
 docs/                      Screenshots and demo media (see below)
 ```
