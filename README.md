@@ -166,4 +166,4 @@ The app is intentionally a single file. Everything else is documentation.
 
 ## License
 
-- The GNU Affero General Public License (AGPL).
+-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See the [GNU AGPL-3.0 license text](https://www.gnu.org/licenses/agpl-3.0.html) for details.
