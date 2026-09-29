@@ -1,7 +1,5 @@
 # Million Times Clock
 
-# Million Times Clock
-
 A generative clock art piece: a grid of hundreds of tiny analog clocks, each one
 individually posed so that together they spell out the current time.
 
@@ -9,7 +7,6 @@ individually posed so that together they spell out the current time.
   <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.webm" type="video/webm">
   <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.mp4"  type="video/mp4">
 </video>
-
 <picture>
   <source srcset="docs/preview.avif" type="image/avif">
   <img src="docs/preview.png" alt="Million Times Clock preview">
