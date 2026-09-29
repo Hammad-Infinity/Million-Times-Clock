@@ -3,6 +3,7 @@
 A generative clock art piece: a grid of hundreds of tiny analog clocks, each one
 individually posed so that together they spell out the current time.
 Watch Demo here [Demo](http://hammad-infinity.github.io/Million-Times-Clock/)
+
 <picture>
   <source srcset="docs/preview.avif" type="image/avif">
   <img src="docs/preview.png" alt="Million Times Clock preview">
@@ -12,8 +13,8 @@ Built with nothing but HTML, CSS, and vanilla JavaScript — no build step, no
 dependencies, no framework.
 
 <video controls muted loop playsinline width="720">
-  <source src="https://github.com/YOUR_USERNAME/Million-Times-Clock/raw/main/docs/demo.webm" type="video/webm">
-  <source src="https://github.com/YOUR_USERNAME/Million-Times-Clock/raw/main/docs/demo.mp4"  type="video/mp4">
+  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.webm" type="video/webm">
+  <source src="https://github.com/Hammad-Infinity/Million-Times-Clock/raw/main/docs/demo.mp4"  type="video/mp4">
 </video>
 
 ---
