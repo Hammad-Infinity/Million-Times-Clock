@@ -137,9 +137,9 @@
       padding: 14px;
       box-shadow: 0 12px 32px var(--shadow);
       z-index: 1000;
-      width: 280px;
-      max-height: calc(100vh - 90px);
-      overflow-y: auto;
+      width: 300px;
+      max-height: none;
+      overflow: visible;
       animation: modalFadeIn 0.18s ease;
       cursor: grab;
     }
@@ -151,22 +151,20 @@
       to { opacity: 1; transform: translateY(0); }
     }
     #settings-modal h3 {
-      margin: 0 0 12px;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--text-dim);
     }
-    #settings-modal .setting {
-      margin-bottom: 12px;
-    }
-    #settings-modal .setting > label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text);
+    #settings-modal h3 .theme-pill {
+      flex: 0 0 auto;
+      text-transform: none;
     }
     #settings-modal label {
       font-size: 13px;
@@ -177,29 +175,55 @@
       -webkit-appearance: none;
       appearance: none;
       width: 100%;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--border);
+      height: 18px;
+      background: transparent;
       outline: none;
-      transition: opacity 0.2s;
+      cursor: pointer;
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+    #settings-modal input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background-color: var(--border);
+    }
+    #settings-modal input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 999px;
+      background-color: var(--border);
     }
     #settings-modal input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: var(--accent);
       cursor: pointer;
       border: 2px solid var(--bg-panel);
+      box-shadow: 0 1px 3px var(--shadow);
+      margin-top: -5px;
+      transition: transform 0.12s ease;
+    }
+    #settings-modal input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.12);
+    }
+    #settings-modal input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.18);
     }
     #settings-modal input[type="range"]::-moz-range-thumb {
       background: var(--accent);
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid var(--bg-panel);
+      box-shadow: 0 1px 3px var(--shadow);
+      transition: transform 0.12s ease;
+    }
+    #settings-modal input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.12);
     }
     .slider-container {
       display: flex;
@@ -215,22 +239,6 @@
       color: var(--text-dim);
       min-width: 42px;
       text-align: right;
-    }
-    .setting-checkbox {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .setting-checkbox label {
-      margin-right: 0;
-      font-size: 13px;
-    }
-    .setting-checkbox input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--accent);
-      cursor: pointer;
     }
     .btn-row {
       display: flex;
@@ -262,6 +270,12 @@
       background: var(--accent);
       color: #0a0a0a;
       border-color: var(--accent);
+    }
+    .btn-row button.active:hover:not(:disabled) {
+      background: var(--accent);
+      color: #0a0a0a;
+      border-color: var(--accent);
+      filter: brightness(1.08);
     }
     .credit {
       display: flex;
@@ -297,14 +311,55 @@
     .credit a:hover {
       text-decoration: underline;
     }
-    .setting-label-row {
+    #settings-modal .section-body {
+      margin-top: 4px;
+    }
+    #settings-modal .section-body.boxed {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px 4px;
+      background: var(--bg-app);
+    }
+    #settings-modal .slider-track-wrap {
+      position: relative;
+      flex: 1 1 auto;
+      padding-top: 4px;
+    }
+    #settings-modal .slider-track-wrap .tick-row {
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      right: 8px;
+      height: 2px;
+      background-image: linear-gradient(to right, var(--text-dim) 0, var(--text-dim) 1px, transparent 1px, transparent 100%);
+      background-size: calc(100% / var(--tick-intervals)) 100%;
+      background-repeat: repeat-x;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    #settings-modal .slider-track-wrap input[type="range"] {
+      width: 100%;
+    }
+    #settings-modal .inline-row {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 6px;
     }
-    .setting-label-row > label {
+    #settings-modal .inline-row > label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 0 0 84px;
+      margin-right: 0;
       margin-bottom: 0;
+    }
+    #settings-modal .inline-row .slider-container {
+      flex: 1 1 auto;
+      margin: 0;
+    }
+    #settings-modal .inline-row .slider-container span {
+      min-width: 34px;
     }
   </style>
 </head>
@@ -320,56 +375,51 @@
   </div>
 
   <div id="settings-modal">
-    <h3>Settings</h3>
-    <div class="setting">
-      <label>Theme</label>
+    <h3>
+      <span>Settings</span>
       <div class="theme-pill" id="theme-pill">
         <button data-theme="dark" class="active">Dark</button>
         <button data-theme="light">Light</button>
       </div>
-    </div>
-    <div class="setting">
-      <label>Pattern</label>
-      <div class="btn-row">
-        <button id="pattern-prev-btn">Previous</button>
-        <button id="pattern-next-btn">Next</button>
+    </h3>
+
+    <div class="section-body boxed">
+      <div class="inline-row">
+        <label for="cols-slider">Columns</label>
+        <div class="slider-container">
+          <div class="slider-track-wrap" style="--tick-intervals: 16;">
+            <div class="tick-row"></div>
+            <input type="range" id="cols-slider" min="8" max="24" step="1" value="24" aria-label="Columns">
+          </div>
+          <span id="cols-value">24</span>
+        </div>
       </div>
-      <div class="btn-row" style="margin-top:6px;">
+      <div class="inline-row">
+        <label for="rows-slider">Rows</label>
+        <div class="slider-container">
+          <div class="slider-track-wrap" style="--tick-intervals: 11;">
+            <div class="tick-row"></div>
+            <input type="range" id="rows-slider" min="3" max="14" step="1" value="12" aria-label="Rows">
+          </div>
+          <span id="rows-value">12</span>
+        </div>
+      </div>
+      <div class="inline-row">
+        <label for="transition-slider">Speed</label>
+        <div class="slider-container">
+          <input type="range" id="transition-slider" min="1" max="20" step="0.2">
+          <span id="transition-value">1.0s</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-body">
+      <div class="btn-row" style="margin-bottom:6px;">
         <button id="show-time-btn">Show time</button>
       </div>
-    </div>
-    <div class="setting">
-      <div class="setting-label-row">
-        <label>Clock grid</label>
-      </div>
-      <div class="slider-container">
-        <input type="range" id="cols-slider" min="8" max="24" step="1" value="24" aria-label="Columns">
-        <span id="cols-value">24</span>
-      </div>
-      <div class="slider-container" style="margin-top:8px;">
-        <input type="range" id="rows-slider" min="3" max="14" step="1" value="12" aria-label="Rows">
-        <span id="rows-value">12</span>
-      </div>
-    </div>
-    <div class="setting setting-checkbox">
-      <label for="hour-format-toggle">24‑hour format</label>
-      <input type="checkbox" id="hour-format-toggle" checked>
-    </div>
-    <div class="setting setting-checkbox">
-      <label for="mouse-follow-toggle">Mouse follow</label>
-      <input type="checkbox" id="mouse-follow-toggle">
-    </div>
-    <div class="setting">
-      <label>Fullscreen</label>
-      <div class="btn-row">
-        <button id="fullscreen-btn">Toggle fullscreen</button>
-      </div>
-    </div>
-    <div class="setting">
-      <label for="transition-slider">Transition Speed</label>
-      <div class="slider-container">
-        <input type="range" id="transition-slider" min="1" max="20" step="0.2">
-        <span id="transition-value">1.0s</span>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button id="hour-format-toggle" class="active">24‑hour</button>
+        <button id="mouse-follow-toggle">Mouse follow</button>
       </div>
     </div>
 
@@ -421,6 +471,7 @@
   </div>
 <script>
 (() => {
+  // Grid size limits, matching the Columns/Rows sliders.
   const COLS_MIN = 8;
   const COLS_MAX = 24;
   const ROWS_MIN = 3;
@@ -505,7 +556,6 @@
       a: .6
     };
   }
-  function updateModalTheme() {}
   function normalizeDeg(deg) {
     deg %= 360;
     if (deg < 0) deg += 360;
@@ -526,6 +576,8 @@
     t = clamp(t, 0, 1);
     return t * t * (3 - 2 * t);
   }
+  // Two-hand poses (0 = up, 90 = right, clockwise). Index 12 is
+  // the blank/rest pose used to clear a cell.
   const clockStates = [ {
     a: 0,
     b: 0
@@ -567,6 +619,8 @@
     b: 225
   } ];
 
+  // Overrides applied after glyph construction. Values are already
+  // [angleA, angleB] pairs, and null hides that hand.
   const handEdits = {
     "letters:R": [
       [ [90, 180], [90, 270], [90, 270], [180, 270] ],
@@ -866,6 +920,7 @@
     }
   }
 
+  // Lexicographic comparison used to score layout candidates.
   function rankBetter(a, b) {
     for (let i = 0; i < a.length; i++) {
       if (a[i] !== b[i]) return a[i] > b[i];
@@ -930,7 +985,42 @@
     }
     return best;
   }
+  function searchVerticalTimeLayout(cols, rows) {
+    const ROW_GAP = 1;
+    let best = null;
+    for (const g of glyphSets()) {
+      const gap = g.w >= 3 ? 0 : 1;
+      const rowW = 2 * g.w + gap;
+      if (rowW > cols) continue;
+      const blockH = 2 * g.h + ROW_GAP;
+      if (blockH > rows) continue;
+      const rank = [ g.h, g.w, gap ];
+      if (!best || rankBetter(rank, best.rank)) {
+        best = {
+          glyph: g,
+          format: "verticalHM",
+          fields: 2,
+          colonW: 0,
+          gap: gap,
+          rowGap: ROW_GAP,
+          blockW: rowW,
+          blockH: blockH,
+          digits: 4,
+          colons: 0,
+          vertical: true,
+          rank: rank
+        };
+      }
+    }
+    return best;
+  }
+  // Portrait grids try the vertical (hours above minutes) layout
+  // first; otherwise fall back to the horizontal search.
   function chooseTimeLayout(cols, rows) {
+    if (rows > cols) {
+      const vertical = searchVerticalTimeLayout(cols, rows);
+      if (vertical) return vertical;
+    }
     const best = searchTimeLayout(cols, rows, false);
     if (best && best.colonW > 0 && best.blockW > cols - 2) {
       const plain = searchTimeLayout(cols, rows, true);
@@ -977,6 +1067,8 @@
     }
     return pat;
   }
+  // Produce one [angleA, angleB] per cell for the current time, plus
+  // a day/date strip underneath when the grid is tall enough.
   function createTimePattern(date) {
     const pattern = new Array(Cols * Rows);
     for (let i = 0; i < pattern.length; i++) pattern[i] = stateHands[12];
@@ -1037,17 +1129,32 @@
         }
       }
     }
-    let x = 0;
-    for (let gi = 0; gi < groups.length; gi++) {
-      if (gi && colon) {
-        stamp(colon, timeRow0, col0 + x);
-        x += layout.colonW;
+    if (layout.vertical) {
+      const rowStride = g.h + layout.rowGap;
+      for (let gi = 0; gi < groups.length; gi++) {
+        const group = groups[gi];
+        const rowW = 2 * g.w + layout.gap;
+        let x = Math.floor((Cols - rowW) / 2);
+        const r0 = timeRow0 + gi * rowStride;
+        for (let di = 0; di < group.length; di++) {
+          if (di && layout.gap) x += 1;
+          stamp(g.digits[group[di]], r0, x);
+          x += g.w;
+        }
       }
-      const group = groups[gi];
-      for (let di = 0; di < group.length; di++) {
-        if (di && layout.gap) x += 1;
-        stamp(g.digits[group[di]], timeRow0, col0 + x);
-        x += g.w;
+    } else {
+      let x = 0;
+      for (let gi = 0; gi < groups.length; gi++) {
+        if (gi && colon) {
+          stamp(colon, timeRow0, col0 + x);
+          x += layout.colonW;
+        }
+        const group = groups[gi];
+        for (let di = 0; di < group.length; di++) {
+          if (di && layout.gap) x += 1;
+          stamp(g.digits[group[di]], timeRow0, col0 + x);
+          x += g.w;
+        }
       }
     }
     if (hasDayDate) {
@@ -1096,6 +1203,8 @@
     return pattern;
   }
   const REST_ANGLE = 225;
+  // Per-cell animator: hands fade in/out and always rotate along the
+  // shortest angular path so transitions never spin the long way.
   class Clock {
     constructor() {
       this.angleA = REST_ANGLE;
@@ -1425,6 +1534,8 @@
   }
   let currentTimeLayout = null;
   let nextPatternSwitchSec = 0;
+  // Recompute every cell's target angle for the chosen pattern and hand
+  // them to each Clock. Time and scroll patterns are pre-rendered first.
   function applyPattern(pIndex, nowSec, durationSec) {
     const moveSeconds = durationSec == null ? TransitionSeconds : durationSec;
     if (pIndex === 20 && lastAppliedPattern !== 20) {
@@ -1805,10 +1916,10 @@
     ctx.shadowOffsetY = 0;
     ctx.restore();
   }
+  // Blit the pre-rendered face, then draw hands and hub for each cell.
   function draw(nowSec) {
     const w = canvas.width;
     const h = canvas.height;
-    void nowSec;
     ctx.clearRect(0, 0, w, h);
     ctx.imageSmoothingEnabled = true;
     const diameter = radius * 2;
@@ -1846,6 +1957,8 @@
       }
     }
   }
+  // Main loop: color transitions, pattern switching / mouse follow,
+  // hand updates, and throttled rendering.
   function tick(tsMs) {
     requestAnimationFrame(tick);
     const nowSec = tsMs / 1e3;
@@ -1857,7 +1970,6 @@
       shadowColor = lerpColor(colorTransition.startShadow, colorTransition.targetShadow, eased);
       document.getElementById("clock-container").style.backgroundColor = `rgb(${backColor.r}, ${backColor.g}, ${backColor.b})`;
       rerenderClockFace();
-      updateModalTheme();
       if (t >= 1) {
         backColor = {
           ...colorTransition.targetBack
@@ -1870,7 +1982,6 @@
         };
         colorTransition = null;
         rerenderClockFace();
-        updateModalTheme();
       }
     }
     if (!mouseFollowActive) {
@@ -1917,6 +2028,7 @@
     pruneRipples(nowSec);
     draw(nowSec);
   }
+  // Wire up the settings modal, theme pill, sliders, toggles, and HUD drag.
   function setupControls() {
     const hudEl = document.getElementById("hud");
     const settingsBtn = document.getElementById("settings-btn");
@@ -1926,10 +2038,7 @@
     const themePill = document.getElementById("theme-pill");
     const hourFormatToggle = document.getElementById("hour-format-toggle");
     const mouseFollowToggle = document.getElementById("mouse-follow-toggle");
-    const patternPrevBtn = document.getElementById("pattern-prev-btn");
-    const patternNextBtn = document.getElementById("pattern-next-btn");
     const showTimeBtn = document.getElementById("show-time-btn");
-    const fullscreenBtn = document.getElementById("fullscreen-btn");
     const colsSlider = document.getElementById("cols-slider");
     const rowsSlider = document.getElementById("rows-slider");
     const colsValue = document.getElementById("cols-value");
@@ -1996,8 +2105,9 @@
     themePill.querySelectorAll("button").forEach(b => {
       b.addEventListener("click", () => setTheme(b.dataset.theme));
     });
-    hourFormatToggle.addEventListener("change", e => {
-      is24Hour = e.target.checked;
+    hourFormatToggle.addEventListener("click", () => {
+      is24Hour = !is24Hour;
+      hourFormatToggle.classList.toggle("active", is24Hour);
       if (patternIndex === 4) {
         const nowSec = performance.now() / 1e3;
         applyPattern(4, nowSec);
@@ -2032,30 +2142,31 @@
       const nowSec = performance.now() / 1e3;
       if (mouseFollowActive) {
         mouseFollowActive = false;
-        mouseFollowToggle.checked = false;
+        mouseFollowToggle.classList.remove("active");
       }
       patternIndex = (idx % totalPattern + totalPattern) % totalPattern;
       applyPattern(patternIndex, nowSec);
       nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
       isAnimating = true;
     }
-    patternNextBtn.addEventListener("click", () => gotoPattern(patternIndex + 1));
-    patternPrevBtn.addEventListener("click", () => gotoPattern(patternIndex - 1));
     showTimeBtn.addEventListener("click", () => gotoPattern(4));
-    mouseFollowToggle.addEventListener("change", e => {
+    mouseFollowToggle.addEventListener("click", () => {
       const nowSec = performance.now() / 1e3;
-      if (e.target.checked) {
+      mouseFollowActive = !mouseFollowActive;
+      mouseFollowToggle.classList.toggle("active", mouseFollowActive);
+      if (mouseFollowActive) {
         lastPatternIndexBeforeMouse = patternIndex;
-        mouseFollowActive = true;
         isAnimating = true;
       } else {
-        mouseFollowActive = false;
         applyPattern(lastPatternIndexBeforeMouse, nowSec);
         nextPatternSwitchSec = nowSec + PatternPeriodSeconds;
         isAnimating = true;
       }
     });
-    fullscreenBtn.addEventListener("click", () => {
+    document.addEventListener("keydown", e => {
+      if (e.key !== "f" && e.key !== "F") return;
+      const t = e.target;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen?.();
       } else {
@@ -2208,6 +2319,9 @@
   lastRenderSec = 0;
   requestAnimationFrame(tick);
   setupControls();
+  // Refresh the time pattern only when its displayed signature changes.
+  // Seconds join the signature only if the current layout shows them.
+  let _lastTimeSig = -1;
   setInterval(() => {
     if (patternIndex === 4) {
       const nowSec = performance.now() / 1e3;
@@ -2225,7 +2339,7 @@
       }
     }
   }, 250);
-  let _lastTimeSig = -1;
+  // Scroll the letters pattern by one column per step.
   const SCROLL_STEP_MS = 700;
   setInterval(() => {
     if (patternIndex === 20 && !mouseFollowActive) {
