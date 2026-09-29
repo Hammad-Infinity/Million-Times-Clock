@@ -4,7 +4,6 @@ A generative clock art piece: a grid of hundreds of tiny analog clocks, each one
 individually posed so that together they spell out the current time.
 
 ![Million Times Clock preview](docs/preview.png)
-<video src="https://github.com/user-attachments/assets/0d3d4b7d-3ad7-40f1-9961-327e74aa2baf" autoplay muted loop playsinline width="720"></video>
 
 Watch Demo here [Demo](http://hammad-infinity.github.io/Million-Times-Clock/)
 Built with nothing but HTML, CSS, and vanilla JavaScript — no build step, no
